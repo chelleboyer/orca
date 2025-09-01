@@ -52,8 +52,10 @@ class Project(BaseModel):
     settings: Mapped[dict] = mapped_column(JSONB, default=dict, nullable=False)
     
     # Relationships
-    creator = relationship("User", foreign_keys=[created_by], back_populates="created_projects")
+    owner = relationship("User", back_populates="owned_projects")
     members = relationship("ProjectMember", back_populates="project", cascade="all, delete-orphan")
+    invitations = relationship("ProjectInvitation", back_populates="project", cascade="all, delete-orphan")
+    objects = relationship("Object", back_populates="project", cascade="all, delete-orphan")
     
     # Table constraints
     __table_args__ = (

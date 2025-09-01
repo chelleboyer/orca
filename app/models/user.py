@@ -42,7 +42,7 @@ class User(Base):
     reset_token_expires: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Relationships
-    created_projects = relationship("Project", foreign_keys="Project.created_by", back_populates="creator")
+    owned_projects = relationship("Project", foreign_keys="Project.created_by", back_populates="owner")
     project_memberships = relationship("ProjectMember", foreign_keys="ProjectMember.user_id", back_populates="user")
 
     def __repr__(self) -> str:

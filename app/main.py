@@ -16,7 +16,8 @@ from app.api.v1 import auth
 from app.api.v1 import projects
 from app.api.v1 import invitations
 from app.api.v1 import dashboard
-# from app.api.v1 import objects, relationships, ctas, attributes, exports
+from app.api.v1 import objects
+# from app.api.v1 import relationships, ctas, attributes, exports
 # from app.api import websocket
 
 app = FastAPI(
@@ -60,7 +61,7 @@ app.include_router(auth.router, prefix="/api/v1")
 app.include_router(projects.router, prefix="/api/v1")
 app.include_router(invitations.router, prefix="/api/v1")
 app.include_router(dashboard.router, prefix="/api/v1")
-# app.include_router(objects.router, prefix="/api/v1/objects", tags=["objects"])
+app.include_router(objects.router, prefix="/api/v1")
 # app.include_router(relationships.router, prefix="/api/v1/relationships", tags=["relationships"])
 # app.include_router(ctas.router, prefix="/api/v1/ctas", tags=["ctas"])
 # app.include_router(attributes.router, prefix="/api/v1/attributes", tags=["attributes"])
