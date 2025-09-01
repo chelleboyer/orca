@@ -15,6 +15,10 @@ class Settings(BaseSettings):
     APP_VERSION: str = "1.0.0"
     DEBUG: bool = True
     ENVIRONMENT: str = "development"
+    FRONTEND_URL: str = Field(
+        default="http://localhost:3000",
+        description="Frontend application URL for email links"
+    )
     
     # Database
     DATABASE_URL: str = Field(

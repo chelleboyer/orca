@@ -13,6 +13,7 @@ from app.core.database import engine, Base
 # Import routers
 from app.api.v1 import auth
 from app.api.v1 import projects
+from app.api.v1 import invitations
 # from app.api.v1 import objects, relationships, ctas, attributes, exports
 # from app.api import websocket
 
@@ -51,6 +52,7 @@ async def health_check():
 # Include API routers
 app.include_router(auth.router, prefix="/api/v1")
 app.include_router(projects.router, prefix="/api/v1")
+app.include_router(invitations.router, prefix="/api/v1")
 # app.include_router(objects.router, prefix="/api/v1/objects", tags=["objects"])
 # app.include_router(relationships.router, prefix="/api/v1/relationships", tags=["relationships"])
 # app.include_router(ctas.router, prefix="/api/v1/ctas", tags=["ctas"])

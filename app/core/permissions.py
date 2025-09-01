@@ -38,20 +38,46 @@ class ProjectPermissions:
     ROLE_HIERARCHY = {
         "viewer": 1,
         "contributor": 2, 
-        "facilitator": 3
+        "facilitator": 3,
+        "owner": 4
     }
     
-    # Permission mappings
+    # Comprehensive permission mappings
     PERMISSIONS = {
-        "view_project": ["viewer", "contributor", "facilitator"],
-        "view_project_details": ["viewer", "contributor", "facilitator"],
-        "create_objects": ["contributor", "facilitator"],
-        "edit_objects": ["contributor", "facilitator"],
-        "delete_objects": ["facilitator"],
-        "edit_project": ["facilitator"],
-        "manage_members": ["facilitator"],
-        "archive_project": ["facilitator"],
-        "delete_project": ["facilitator"],
+        # Project management
+        "view_project": ["viewer", "contributor", "facilitator", "owner"],
+        "view_project_details": ["viewer", "contributor", "facilitator", "owner"],
+        "edit_project_settings": ["facilitator", "owner"],
+        "archive_project": ["facilitator", "owner"],
+        "delete_project": ["owner"],
+        
+        # Member management
+        "invite_users": ["facilitator", "owner"],
+        "view_members": ["viewer", "contributor", "facilitator", "owner"],
+        "remove_members": ["facilitator", "owner"],
+        "change_member_roles": ["facilitator", "owner"],
+        "manage_invitations": ["facilitator", "owner"],
+        
+        # Content management
+        "create_objects": ["contributor", "facilitator", "owner"],
+        "edit_objects": ["contributor", "facilitator", "owner"],
+        "delete_objects": ["facilitator", "owner"],
+        "create_relationships": ["contributor", "facilitator", "owner"],
+        "edit_relationships": ["contributor", "facilitator", "owner"],
+        "delete_relationships": ["facilitator", "owner"],
+        "create_ctas": ["contributor", "facilitator", "owner"],
+        "edit_ctas": ["contributor", "facilitator", "owner"],
+        "delete_ctas": ["facilitator", "owner"],
+        
+        # Export and sharing
+        "export_data": ["contributor", "facilitator", "owner"],
+        "share_project": ["facilitator", "owner"],
+        
+        # Comments and collaboration
+        "create_comments": ["viewer", "contributor", "facilitator", "owner"],
+        "edit_own_comments": ["viewer", "contributor", "facilitator", "owner"],
+        "delete_own_comments": ["viewer", "contributor", "facilitator", "owner"],
+        "moderate_comments": ["facilitator", "owner"],
     }
 
     @classmethod
@@ -95,9 +121,66 @@ class ProjectPermissions:
         Returns:
             List of roles user can assign
         """
-        if user_role == "facilitator":
-            return ["viewer", "contributor", "facilitator"]
+        if user_role == "owner":
+            return ["facilitator", "contributor", "viewer"]
+        elif user_role == "facilitator":
+            return ["contributor", "viewer"]
         return []
+
+    @classmethod
+    def can_manage_member(cls, user_role: str, target_role: str) -> bool:
+        """
+        Check if user can manage (remove/change role) another member
+        
+        Args:
+            user_role: The user's current role
+            target_role: The target member's role
+            
+        Returns:
+            True if user can manage the target member, False otherwise
+        """
+        # Owner can manage anyone except other owners
+        if user_role == "owner":
+            return target_role != "owner"
+        
+        # Facilitator can manage contributors and viewers
+        if user_role == "facilitator":
+            return target_role in ["contributor", "viewer"]
+        
+        # Contributors and viewers cannot manage anyone
+        return False
+
+    @classmethod
+    def can_assign_role(cls, user_role: str, target_role: str) -> bool:
+        """
+        Check if user can assign a specific role to someone
+        
+        Args:
+            user_role: The user's current role
+            target_role: The role being assigned
+            
+        Returns:
+            True if user can assign the target role, False otherwise
+        """
+        assignable_roles = cls.get_accessible_roles(user_role)
+        return target_role in assignable_roles
+
+    @classmethod
+    def get_permissions_for_role(cls, role: str) -> List[str]:
+        """
+        Get all permissions for a given role
+        
+        Args:
+            role: The role to get permissions for
+            
+        Returns:
+            List of permission names
+        """
+        permissions = []
+        for permission, allowed_roles in cls.PERMISSIONS.items():
+            if role in allowed_roles:
+                permissions.append(permission)
+        return permissions
 
 
 def get_project_or_404(
