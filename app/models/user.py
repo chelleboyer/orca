@@ -8,7 +8,7 @@ from typing import Optional
 
 from sqlalchemy import Boolean, DateTime, String, Text
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
 from app.core.database import Base
@@ -40,6 +40,10 @@ class User(Base):
     verification_token: Mapped[Optional[str]] = mapped_column(String(255), nullable=True, index=True)
     reset_token: Mapped[Optional[str]] = mapped_column(String(255), nullable=True, index=True)
     reset_token_expires: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    # Relationships
+    created_projects = relationship("Project", foreign_keys="Project.created_by", back_populates="creator")
+    project_memberships = relationship("ProjectMember", foreign_keys="ProjectMember.user_id", back_populates="user")
 
     def __repr__(self) -> str:
         return f"<User(id='{self.id}', email='{self.email}', name='{self.name}')>"
