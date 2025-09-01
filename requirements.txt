@@ -1,0 +1,47 @@
+# Production Dependencies
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-dotenv==1.0.0
+
+# Database
+sqlalchemy==2.0.23
+asyncpg==0.29.0
+psycopg2-binary==2.9.9
+alembic==1.12.1
+
+# Redis and caching
+redis==5.0.1
+hiredis==2.2.3
+
+# Templates and static files
+jinja2==3.1.2
+aiofiles==23.2.1
+
+# Export functionality
+reportlab==4.0.7
+openpyxl==3.1.2
+
+# Validation and serialization
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# HTTP client for external APIs
+httpx==0.25.2
+
+# WebSocket support
+websockets==12.0
+
+# Security
+argon2-cffi==23.1.0
+cryptography==41.0.8
+
+# Monitoring and logging
+structlog==23.2.0
+sentry-sdk[fastapi]==1.38.0
+
+# Background tasks
+celery==5.3.4
+kombu==5.3.4

@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: ooux_postgres
+    environment:
+      POSTGRES_DB: ooux_orca
+      POSTGRES_USER: ooux_user
+      POSTGRES_PASSWORD: ooux_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - ooux_network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: ooux_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - ooux_network
+
+  # Database Admin Interface
+  adminer:
+    image: adminer:4.8.1
+    container_name: ooux_adminer
+    ports:
+      - "8080:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+      ADMINER_DESIGN: nette
+    networks:
+      - ooux_network
+    depends_on:
+      - postgres
+
+  # Main Application (for production)
+  app:
+    build: .
+    container_name: ooux_app
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://ooux_user:ooux_password@postgres:5432/ooux_orca
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: your-production-secret-key
+      DEBUG: "False"
+      ENVIRONMENT: production
+    volumes:
+      - ./uploads:/app/uploads
+      - ./exports:/app/exports
+    networks:
+      - ooux_network
+    depends_on:
+      - postgres
+      - redis
+    profiles:
+      - production
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  ooux_network:
+    driver: bridge

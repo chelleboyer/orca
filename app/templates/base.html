@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-gray-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}OOUX ORCA{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="h-full">
+    <div class="min-h-full flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+        <div class="sm:mx-auto sm:w-full sm:max-w-md">
+            <div class="text-center">
+                <h1 class="text-3xl font-bold text-gray-900">OOUX ORCA</h1>
+                <p class="mt-2 text-sm text-gray-600">Object-Oriented UX Project Builder</p>
+            </div>
+            {% block header %}{% endblock %}
+        </div>
+
+        <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+            <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast notifications container -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50"></div>
+
+    <script>
+        // HTMX configuration
+        document.addEventListener('htmx:responseError', function(evt) {
+            const response = evt.detail.xhr.responseJSON;
+            showToast(response?.detail || 'An error occurred', 'error');
+        });
+
+        document.addEventListener('htmx:afterRequest', function(evt) {
+            const response = evt.detail.xhr.response;
+            if (evt.detail.successful && response) {
+                try {
+                    const data = JSON.parse(response);
+                    if (data.message) {
+                        showToast(data.message, 'success');
+                    }
+                } catch (e) {
+                    // Ignore parsing errors for non-JSON responses
+                }
+            }
+        });
+
+        // Toast notification system
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const bgColor = type === 'error' ? 'bg-red-500' : 
+                           type === 'success' ? 'bg-green-500' : 'bg-blue-500';
+            
+            toast.className = `${bgColor} text-white px-6 py-4 rounded-lg shadow-lg mb-4 max-w-sm`;
+            toast.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <span>${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.remove();
+                }
+            }, 5000);
+        }
+
+        // Form validation helpers
+        function validatePassword(password) {
+            const minLength = password.length >= 8;
+            const hasUpper = /[A-Z]/.test(password);
+            const hasLower = /[a-z]/.test(password);
+            const hasNumber = /\d/.test(password);
+            
+            return {
+                valid: minLength && hasUpper && hasLower && hasNumber,
+                errors: [
+                    !minLength && 'Password must be at least 8 characters long',
+                    !hasUpper && 'Password must contain at least one uppercase letter',
+                    !hasLower && 'Password must contain at least one lowercase letter',
+                    !hasNumber && 'Password must contain at least one number'
+                ].filter(Boolean)
+            };
+        }
+
+        function validateName(name) {
+            const trimmed = name.trim();
+            const validChars = /^[a-zA-Z0-9\s]+$/.test(trimmed);
+            const validLength = trimmed.length >= 2 && trimmed.length <= 50;
+            
+            return {
+                valid: validChars && validLength,
+                errors: [
+                    !validLength && 'Name must be between 2 and 50 characters',
+                    !validChars && 'Name must contain only alphanumeric characters and spaces'
+                ].filter(Boolean)
+            };
+        }
+    </script>
+</body>
+</html>
