@@ -27,7 +27,8 @@ from app.schemas.project import (
     ProjectMemberResponse,
     PaginationInfo,
     ProjectStatus,
-    ProjectMemberRole
+    ProjectMemberRole,
+    ProjectMemberStatus
 )
 from app.core.permissions import (
     check_slug_exists,
@@ -195,6 +196,9 @@ class ProjectService:
         project_summaries = []
         for project in projects:
             membership = get_user_project_membership(user, project, self.db)
+            if not membership:
+                continue  # Skip if user somehow doesn't have membership
+                
             member_count = self.get_project_member_count(project.id)
             progress = self.get_project_progress(project.id)
             
@@ -240,6 +244,9 @@ class ProjectService:
         """
         # Get creator info
         creator = self.db.query(User).filter(User.id == project.created_by).first()
+        if not creator:
+            raise ValueError(f"Creator not found for project {project.id}")
+            
         creator_summary = UserSummary(
             id=creator.id,
             name=creator.name,
@@ -248,6 +255,8 @@ class ProjectService:
         
         # Get user's membership
         user_membership = get_user_project_membership(user, project, self.db)
+        if not user_membership:
+            raise ValueError(f"User {user.id} is not a member of project {project.id}")
         
         # Get all project members
         members_query = self.db.query(ProjectMember).filter(
@@ -266,7 +275,7 @@ class ProjectService:
                 id=member.id,
                 user=user_summary,
                 role=ProjectMemberRole(member.role),
-                status=member.status,
+                status=ProjectMemberStatus(member.status),
                 invited_at=member.invited_at,
                 joined_at=member.joined_at,
                 created_at=member.created_at,
@@ -305,6 +314,9 @@ class ProjectService:
         """
         # Get creator info
         creator = self.db.query(User).filter(User.id == project.created_by).first()
+        if not creator:
+            raise ValueError(f"Creator not found for project {project.id}")
+            
         creator_summary = UserSummary(
             id=creator.id,
             name=creator.name,
@@ -313,6 +325,8 @@ class ProjectService:
         
         # Get user's membership
         user_membership = get_user_project_membership(user, project, self.db)
+        if not user_membership:
+            raise ValueError(f"User {user.id} is not a member of project {project.id}")
         
         # Get member count
         member_count = self.get_project_member_count(project.id)
@@ -490,6 +504,9 @@ class ProjectService:
         project_summaries = []
         for project in projects:
             membership = get_user_project_membership(user, project, self.db)
+            if not membership:
+                continue  # Skip if user somehow doesn't have membership
+                
             member_count = self.get_project_member_count(project.id)
             progress = self.get_project_progress(project.id)
             
