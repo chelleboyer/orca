@@ -1,0 +1,73 @@
+<!-- Test version of dashboard template -->
+{% extends "test_base.html" %}
+
+{% block title %}{{ project.title }} - Dashboard{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="/static/css/dashboard.css">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Header Section -->
+    <header class="dashboard-header">
+        <div class="project-info">
+            <h1 class="project-title">{{ project.title }}</h1>
+            <p class="project-description">{{ project.description or "No description provided" }}</p>
+        </div>
+    </header>
+
+    <div class="dashboard-content">
+        <!-- Progress Overview -->
+        <section class="progress-section">
+            <h2>OOUX Methodology Progress</h2>
+            <div class="progress-grid">
+                {% for section_id, section in orca_progress.items() %}
+                <div class="progress-card {{ section.status }}" data-section-id="{{ section_id }}">
+                    <div class="progress-header">
+                        <h3>{{ section_id|format_section_name }}</h3>
+                        <span class="progress-percentage">{{ section.progress_percentage }}%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" data-progress="{{ section.progress_percentage }}"></div>
+                    </div>
+                    <div class="progress-meta">
+                        <span class="artifact-count">{{ section.artifact_count }} artifacts</span>
+                        {% if section.last_updated %}
+                        <span class="last-updated">Updated {{ section.last_updated|format_datetime }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Statistics Section -->
+        <section class="stats-section">
+            <h2>Project Statistics</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">{{ project_statistics.total_objects }}</div>
+                    <div class="stat-label">Objects</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ project_statistics.total_relationships }}</div>
+                    <div class="stat-label">Relationships</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ project_statistics.total_ctas }}</div>
+                    <div class="stat-label">CTAs</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ project_statistics.total_attributes }}</div>
+                    <div class="stat-label">Attributes</div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/dashboard.js"></script>
+{% endblock %}

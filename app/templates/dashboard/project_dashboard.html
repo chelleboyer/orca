@@ -1,0 +1,237 @@
+<!-- Project Dashboard Template -->
+{% extends "app_base.html" %}
+
+{% block title %}{{ project.title }} - Dashboard{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', path='/css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Header Section -->
+    <header class="dashboard-header">
+        <div class="project-info">
+            <h1 class="project-title">{{ project.title }}</h1>
+            <p class="project-description">{{ project.description or "No description provided" }}</p>
+            <div class="project-meta">
+                <span class="meta-item">
+                    <i class="icon-users"></i>
+                    {{ team_members|length }} members
+                </span>
+                <span class="meta-item">
+                    <i class="icon-calendar"></i>
+                    Updated {{ project.updated_at|format_datetime }}
+                </span>
+                <span class="meta-item role-badge role-{{ current_user_role }}">
+                    {{ current_user_role|title }}
+                </span>
+            </div>
+        </div>
+        
+        <div class="dashboard-actions">
+            {% if "manage_members" in permissions %}
+            <button class="btn btn-secondary" onclick="showInviteModal()">
+                <i class="icon-plus"></i>
+                Invite Members
+            </button>
+            {% endif %}
+            
+            {% if "edit_project" in permissions %}
+            <button class="btn btn-primary" onclick="editProject()">
+                <i class="icon-edit"></i>
+                Edit Project
+            </button>
+            {% endif %}
+        </div>
+    </header>
+
+    <div class="dashboard-content">
+        <!-- Progress Overview -->
+        <section class="progress-section">
+            <h2>OOUX Methodology Progress</h2>
+            <div class="progress-grid">
+                {% for section_id, section in orca_progress.items() %}
+                <div class="progress-card {{ section.status }}" data-section-id="{{ section_id }}">
+                    <div class="progress-header">
+                        <h3>{{ section_id|format_section_name }}</h3>
+                        <span class="progress-percentage">{{ section.progress_percentage }}%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" data-progress="{{ section.progress_percentage }}"></div>
+                    </div>
+                    <div class="progress-meta">
+                        <span class="artifact-count">{{ section.artifact_count }} artifacts</span>
+                        {% if section.last_updated %}
+                        <span class="last-updated">Updated {{ section.last_updated|format_datetime }}</span>
+                        {% endif %}
+                    </div>
+                    {% if "view_content" in permissions %}
+                    <button class="btn-link" onclick="navigateToSection('{{ section_id }}')">
+                        View Section →
+                    </button>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Statistics and Team -->
+        <div class="dashboard-grid">
+            <!-- Project Statistics -->
+            <section class="stats-section">
+                <h2>Project Statistics</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">{{ project_statistics.total_objects }}</div>
+                        <div class="stat-label">Objects</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">{{ project_statistics.total_relationships }}</div>
+                        <div class="stat-label">Relationships</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">{{ project_statistics.total_ctas }}</div>
+                        <div class="stat-label">CTAs</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">{{ project_statistics.total_attributes }}</div>
+                        <div class="stat-label">Attributes</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Team Members -->
+            <section class="team-section">
+                <div class="section-header">
+                    <h2>Team Members</h2>
+                    {% if "manage_members" in permissions %}
+                    <button class="btn btn-sm btn-outline" onclick="showInviteModal()">
+                        <i class="icon-plus"></i>
+                        Invite
+                    </button>
+                    {% endif %}
+                </div>
+                
+                <div class="team-list">
+                    {% for member in team_members %}
+                    <div class="member-card">
+                        <img src="{{ member.avatar_url }}" alt="{{ member.name }}" class="member-avatar">
+                        <div class="member-info">
+                            <div class="member-name">{{ member.name }}</div>
+                            <div class="member-email">{{ member.email }}</div>
+                            <div class="member-role role-{{ member.role }}">{{ member.role|title }}</div>
+                        </div>
+                        <div class="member-meta">
+                            {% if member.last_active %}
+                            <span class="last-active">Active {{ member.last_active|format_datetime }}</span>
+                            {% endif %}
+                            {% if "manage_members" in permissions and member.role != "owner" %}
+                            <button class="btn-icon" onclick="manageMember('{{ member.user_id }}')">
+                                <i class="icon-settings"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Pending Invitations -->
+                {% if pending_invitations %}
+                <div class="pending-invitations">
+                    <h3>Pending Invitations</h3>
+                    {% for invitation in pending_invitations %}
+                    <div class="invitation-card" data-invitation-id="{{ invitation.id }}">
+                        <div class="invitation-info">
+                            <span class="invitation-email">{{ invitation.email }}</span>
+                            <span class="invitation-role role-{{ invitation.role }}">{{ invitation.role|title }}</span>
+                        </div>
+                        <div class="invitation-actions">
+                            <span class="invitation-date">Sent {{ invitation.created_at|format_datetime }}</span>
+                            {% if "manage_members" in permissions %}
+                            <button class="btn-link text-danger" onclick="cancelInvitation('{{ invitation.id }}')">
+                                Cancel
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </section>
+        </div>
+
+        <!-- Recent Activity -->
+        <section class="activity-section">
+            <h2>Recent Activity</h2>
+            <div class="activity-feed">
+                {% for activity in recent_activity %}
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        <i class="icon-{{ activity.type }}"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-description">{{ activity.description }}</div>
+                        <div class="activity-meta">
+                            <span class="activity-user">{{ activity.user }}</span>
+                            <span class="activity-time">{{ activity.timestamp|format_datetime }}</span>
+                        </div>
+                    </div>
+                    {% if activity.artifact_id and "view_content" in permissions %}
+                    <button class="btn-link" onclick="viewArtifact('{{ activity.artifact_id }}')">
+                        View →
+                    </button>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                
+                {% if not recent_activity %}
+                <div class="empty-state">
+                    <i class="icon-activity"></i>
+                    <p>No recent activity</p>
+                    {% if "edit_objects" in permissions %}
+                    <button class="btn btn-primary" onclick="startWorking()">
+                        Start Working
+                    </button>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+</div>
+
+<!-- Invite Member Modal -->
+{% if "manage_members" in permissions %}
+<div id="inviteModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Invite Team Member</h3>
+            <button class="modal-close" onclick="hideInviteModal()">&times;</button>
+        </div>
+        <form id="inviteForm" onsubmit="sendInvitation(event)">
+            <div class="form-group">
+                <label for="inviteEmail">Email Address</label>
+                <input type="email" id="inviteEmail" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="inviteRole">Role</label>
+                <select id="inviteRole" name="role" required>
+                    <option value="viewer">Viewer</option>
+                    <option value="contributor">Contributor</option>
+                    {% if current_user_role in ["owner", "facilitator"] %}
+                    <option value="facilitator">Facilitator</option>
+                    {% endif %}
+                </select>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="hideInviteModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Send Invitation</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<script src="{{ url_for('static', path='/js/dashboard.js') }}"></script>
+{% endblock %}
