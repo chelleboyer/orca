@@ -24,11 +24,10 @@ class InvitationCreate(BaseModel):
         return v
     
     class Config:
-        schema_extra = {
+        json_json_schema_extra = {
             "example": {
-                "email": "colleague@example.com",
-                "role": "contributor",
-                "message": "Join our OOUX project!"
+                "email": "user@example.com",
+                "role": "contributor"
             }
         }
 
@@ -67,7 +66,7 @@ class InvitationResponse(BaseModel):
         )
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "invitation_id": "123e4567-e89b-12d3-a456-426614174000",
                 "email": "colleague@example.com",
@@ -92,7 +91,7 @@ class InvitationListResponse(BaseModel):
     invitations: List[Dict[str, Any]] = Field(..., description="List of invitations")
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "invitations": [
                     {
@@ -118,7 +117,7 @@ class InvitationAcceptResponse(BaseModel):
     role: str = Field(..., description="Role assigned in the project")
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "success": True,
                 "message": "Invitation accepted successfully",
@@ -161,7 +160,7 @@ class ProjectMemberResponse(BaseModel):
         )
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "user_id": "123e4567-e89b-12d3-a456-426614174003",
                 "name": "John Doe",
@@ -186,7 +185,7 @@ class ProjectMembersResponse(BaseModel):
     pending_invitations: List[Dict[str, Any]] = Field(default=[], description="List of pending invitations")
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "members": [
                     {
@@ -224,7 +223,7 @@ class RoleChangeRequest(BaseModel):
         return v
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "role": "contributor"
             }
@@ -244,7 +243,7 @@ class InvitationPublicResponse(BaseModel):
     message: Optional[str] = Field(None, description="Custom invitation message")
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "invitation_id": "123e4567-e89b-12d3-a456-426614174000",
                 "project_title": "My OOUX Project",

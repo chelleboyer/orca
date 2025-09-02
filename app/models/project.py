@@ -56,6 +56,9 @@ class Project(BaseModel):
     members = relationship("ProjectMember", back_populates="project", cascade="all, delete-orphan")
     invitations = relationship("ProjectInvitation", back_populates="project", cascade="all, delete-orphan")
     objects = relationship("Object", back_populates="project", cascade="all, delete-orphan")
+    relationships = relationship("Relationship", back_populates="project", cascade="all, delete-orphan")
+    roles = relationship("Role", back_populates="project", cascade="all, delete-orphan")
+    ctas = relationship("CTA", back_populates="project", cascade="all, delete-orphan")
     
     # Table constraints
     __table_args__ = (

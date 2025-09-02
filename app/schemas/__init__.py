@@ -45,6 +45,41 @@ from .project import (
     ProjectValidationError,
 )
 
+from .role import (
+    RoleBase,
+    RoleCreate,
+    RoleUpdate,
+    RoleResponse,
+    RoleListResponse,
+    RoleReorderRequest,
+    DefaultRoleTemplate,
+    DefaultRolesResponse,
+    RoleBulkCreateRequest,
+    RoleBulkCreateResponse,
+    RoleSearchRequest,
+    RoleSearchResponse,
+)
+
+from .cta import (
+    CTABase,
+    CTACreate,
+    CTAUpdate,
+    CTAResponse,
+    CTAListResponse,
+    CTAMatrixCell,
+    CTAMatrixRow,
+    CTAMatrixResponse,
+    CTABulkCreateRequest,
+    CTABulkCreateResponse,
+    CTASearchRequest,
+    CTASearchResponse,
+    UserStoryGenerateRequest,
+    UserStoryResponse,
+    CTAExportRequest,
+    CTAValidationResult,
+    CTAStatsResponse,
+)
+
 __all__ = [
     # Auth schemas
     "UserBase",
@@ -86,4 +121,37 @@ __all__ = [
     "ProjectNotFoundError",
     "ProjectPermissionError",
     "ProjectValidationError",
+    
+    # Role schemas
+    "RoleBase",
+    "RoleCreate",
+    "RoleUpdate",
+    "RoleResponse",
+    "RoleListResponse",
+    "RoleReorderRequest",
+    "DefaultRoleTemplate",
+    "DefaultRolesResponse",
+    "RoleBulkCreateRequest",
+    "RoleBulkCreateResponse",
+    "RoleSearchRequest",
+    "RoleSearchResponse",
+    
+    # CTA schemas
+    "CTABase",
+    "CTACreate",
+    "CTAUpdate",
+    "CTAResponse",
+    "CTAListResponse",
+    "CTAMatrixCell",
+    "CTAMatrixRow",
+    "CTAMatrixResponse",
+    "CTABulkCreateRequest",
+    "CTABulkCreateResponse",
+    "CTASearchRequest",
+    "CTASearchResponse",
+    "UserStoryGenerateRequest",
+    "UserStoryResponse",
+    "CTAExportRequest",
+    "CTAValidationResult",
+    "CTAStatsResponse",
 ]

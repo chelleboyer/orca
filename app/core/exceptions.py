@@ -113,6 +113,21 @@ class RateLimitError(AppException):
         super().__init__(message, status_code=429, details=details)
 
 
+class BusinessRuleError(AppException):
+    """Raised when a business rule is violated"""
+    
+    def __init__(
+        self,
+        message: str = "Business rule violation",
+        rule_name: Optional[str] = None,
+        details: Optional[Dict[str, Any]] = None
+    ):
+        details = details or {}
+        if rule_name:
+            details["rule_name"] = rule_name
+        super().__init__(message, status_code=400, details=details)
+
+
 class ExternalServiceError(AppException):
     """Raised when an external service fails"""
     

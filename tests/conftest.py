@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import redis.asyncio as redis
+from unittest.mock import AsyncMock, patch
 
 from app.main import app
 from app.core.config import settings
@@ -71,14 +72,28 @@ def db_session(db_engine):
 
 @pytest.fixture(scope="function")
 def client(db_session):
-    """Create test client with database override"""
+    """Create test client with database override and Redis mocking"""
     def override_get_db_with_session():
         yield db_session
     
-    app.dependency_overrides[get_db] = override_get_db_with_session
-    with TestClient(app) as test_client:
-        yield test_client
-    app.dependency_overrides.clear()
+    # Mock Redis to avoid event loop issues
+    with patch('app.core.security.get_redis_client') as mock_redis_func:
+        mock_redis = AsyncMock()
+        mock_redis.get.return_value = None
+        mock_redis.set.return_value = True
+        mock_redis.delete.return_value = True
+        mock_redis.keys.return_value = []
+        mock_redis.setex.return_value = True
+        mock_redis_func.return_value = mock_redis
+        
+        # Mock session validation to always return True for tests
+        with patch('app.core.security.session_manager.validate_session', return_value=True):
+            app.dependency_overrides[get_db] = override_get_db_with_session
+            
+            with TestClient(app) as test_client:
+                yield test_client
+                
+            app.dependency_overrides.clear()
 
 
 @pytest.fixture
@@ -106,6 +121,36 @@ def sample_user(db_session, sample_user_data):
     db_session.commit()
     db_session.refresh(user)
     return user
+
+
+@pytest.fixture
+def sample_project(db_session, sample_user):
+    """Create a sample project in the database"""
+    from app.models.project import Project, ProjectMember
+    
+    project = Project(
+        title="Test Project",
+        description="A test project for OOUX",
+        slug="test-project",
+        created_by=sample_user.id,
+        status="active"
+    )
+    db_session.add(project)
+    db_session.commit()
+    db_session.refresh(project)
+    
+    # Add user as project member with facilitator role
+    membership = ProjectMember(
+        project_id=project.id,
+        user_id=sample_user.id,
+        role="facilitator",
+        status="active"
+    )
+    db_session.add(membership)
+    db_session.commit()
+    db_session.refresh(membership)
+    
+    return project
 
 
 @pytest.fixture

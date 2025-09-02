@@ -17,7 +17,9 @@ from app.api.v1 import projects
 from app.api.v1 import invitations
 from app.api.v1 import dashboard
 from app.api.v1 import objects
-# from app.api.v1 import relationships, ctas, attributes, exports
+from app.api.v1 import relationships
+from app.api.v1 import roles, ctas
+# from app.api.v1 import attributes, exports
 # from app.api import websocket
 
 app = FastAPI(
@@ -62,11 +64,12 @@ app.include_router(projects.router, prefix="/api/v1")
 app.include_router(invitations.router, prefix="/api/v1")
 app.include_router(dashboard.router, prefix="/api/v1")
 app.include_router(objects.router, prefix="/api/v1")
-# app.include_router(relationships.router, prefix="/api/v1/relationships", tags=["relationships"])
-# app.include_router(ctas.router, prefix="/api/v1/ctas", tags=["ctas"])
+app.include_router(relationships.router, prefix="/api/v1")
+app.include_router(roles.router, prefix="/api/v1")
+app.include_router(ctas.router, prefix="/api/v1")
 # app.include_router(attributes.router, prefix="/api/v1/attributes", tags=["attributes"])
 # app.include_router(exports.router, prefix="/api/v1/exports", tags=["exports"])
-# app.include_router(websocket.router, prefix="/ws", tags=["websocket"])
+# app.include_router(websocket.router, prefix="/api/v1/websocket", tags=["websocket"])
 
 @app.on_event("startup")
 async def startup_event():

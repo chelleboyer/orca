@@ -35,6 +35,13 @@ class Object(Base):
     synonyms = relationship("ObjectSynonym", back_populates="object", cascade="all, delete-orphan")
     states = relationship("ObjectState", back_populates="object", cascade="all, delete-orphan")
     
+    # Relationship connections for NOM matrix
+    outgoing_relationships = relationship("Relationship", foreign_keys="Relationship.source_object_id", back_populates="source_object", cascade="all, delete-orphan")
+    incoming_relationships = relationship("Relationship", foreign_keys="Relationship.target_object_id", back_populates="target_object", cascade="all, delete-orphan")
+    
+    # CTA connections for behavioral matrix
+    ctas = relationship("CTA", back_populates="object", cascade="all, delete-orphan")
+    
     # Indexes for performance
     __table_args__ = (
         Index('ix_objects_project_name', 'project_id', 'name'),
