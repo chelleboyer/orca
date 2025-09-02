@@ -1,0 +1,207 @@
+<!-- CTA Matrix Template -->
+{% extends "app_base.html" %}
+
+{% block title %}{{ project.title }} - CTA Matrix{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', path='/css/dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', path='/css/matrix.css') }}">
+<script src="https://unpkg.com/htmx.org@1.9.6"></script>
+{% endblock %}
+
+{% block content %}
+<div class="matrix-container">
+    <!-- Header Section -->
+    <header class="matrix-header">
+        <div class="matrix-title-section">
+            <h1 class="matrix-title">Call-to-Action Matrix</h1>
+            <p class="matrix-description">Map roles to objects and define behavioral interactions</p>
+            <nav class="breadcrumb">
+                <a href="#" onclick="window.history.back()">{{ project.title }}</a>
+                <span class="breadcrumb-separator">→</span>
+                <span class="breadcrumb-current">CTA Matrix</span>
+            </nav>
+        </div>
+        
+        <div class="matrix-actions">
+            {% if "edit_ctas" in permissions %}
+            <button class="btn btn-secondary" onclick="showBulkCreateModal()">
+                <i class="icon-plus"></i>
+                Bulk Add CTAs
+            </button>
+            <button class="btn btn-primary" 
+                    hx-get="{% if is_demo %}/api/v1/demo/cta-matrix-grid{% else %}/api/v1/htmx/projects/{{ project.id }}/cta-matrix-grid{% endif %}" 
+                    hx-target="#matrix-grid"
+                    hx-trigger="click"
+                    hx-indicator="#matrix-loading">
+                <i class="icon-refresh"></i>
+                Refresh Matrix
+            </button>
+            {% endif %}
+        </div>
+    </header>
+
+    <!-- Matrix Controls -->
+    <div class="matrix-controls">
+        <div class="matrix-filters">
+            <div class="filter-group">
+                <label for="filterRole">Filter by Role:</label>
+                <select id="filterRole" onchange="filterMatrix()">
+                    <option value="">All Roles</option>
+                    {% for role in matrix_data.roles %}
+                    <option value="{{ role.id }}">{{ role.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="filterObject">Filter by Object:</label>
+                <select id="filterObject" onchange="filterMatrix()">
+                    <option value="">All Objects</option>
+                    {% for object in matrix_data.objects %}
+                    <option value="{{ object.id }}">{{ object.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="filterCrud">Filter by CRUD:</label>
+                <select id="filterCrud" onchange="filterMatrix()">
+                    <option value="">All Actions</option>
+                    <option value="CREATE">Create</option>
+                    <option value="READ">Read</option>
+                    <option value="UPDATE">Update</option>
+                    <option value="DELETE">Delete</option>
+                    <option value="NONE">Non-CRUD</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="matrix-legend">
+            <div class="legend-item">
+                <span class="legend-color create-action"></span>
+                <span class="legend-label">Create</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color read-action"></span>
+                <span class="legend-label">Read</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color update-action"></span>
+                <span class="legend-label">Update</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color delete-action"></span>
+                <span class="legend-label">Delete</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-color none-action"></span>
+                <span class="legend-label">Non-CRUD</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="matrix-loading" class="loading-indicator" style="display: none;">
+        <div class="loading-spinner"></div>
+        <span>Loading matrix data...</span>
+    </div>
+
+    <!-- Matrix Grid Container -->
+    <div class="matrix-wrapper">
+        <div id="matrix-grid" 
+             hx-get="{% if is_demo %}/api/v1/demo/cta-matrix-grid{% else %}/api/v1/htmx/projects/{{ project.id }}/cta-matrix-grid{% endif %}" 
+             hx-trigger="load"
+             hx-indicator="#matrix-loading">
+            <!-- Matrix content will be loaded here via HTMX -->
+        </div>
+    </div>
+</div>
+
+<!-- CTA Edit Modal -->
+{% if "edit_ctas" in permissions %}
+<div id="ctaModal" class="modal" style="display: none;">
+    <div class="modal-content modal-large">
+        <div class="modal-header">
+            <h3 id="modalTitle">Edit CTAs</h3>
+            <button class="modal-close" onclick="hideCTAModal()">&times;</button>
+        </div>
+        <div id="modalBody">
+            <!-- Modal content loaded via HTMX -->
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Create Modal -->
+<div id="bulkCreateModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Bulk Create CTAs</h3>
+            <button class="modal-close" onclick="hideBulkCreateModal()">&times;</button>
+        </div>
+        <form id="bulkCreateForm" 
+              hx-post="/api/v1/projects/{{ project.id }}/ctas/bulk-create"
+              hx-target="#bulkCreateResult"
+              hx-indicator="#bulkCreateLoading">
+            <div class="form-group">
+                <label for="bulkRoles">Select Roles:</label>
+                <div class="checkbox-list">
+                    {% for role in matrix_data.roles %}
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="role_ids" value="{{ role.id }}">
+                        <span>{{ role.name }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="bulkObjects">Select Objects:</label>
+                <div class="checkbox-list">
+                    {% for object in matrix_data.objects %}
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="object_ids" value="{{ object.id }}">
+                        <span>{{ object.name }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="bulkCrudTypes">CRUD Types:</label>
+                <div class="checkbox-list">
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="crud_types" value="CREATE">
+                        <span>Create</span>
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="crud_types" value="READ">
+                        <span>Read</span>
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="crud_types" value="UPDATE">
+                        <span>Update</span>
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="crud_types" value="DELETE">
+                        <span>Delete</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div id="bulkCreateResult"></div>
+            <div id="bulkCreateLoading" class="loading-indicator" style="display: none;">
+                <span>Creating CTAs...</span>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="hideBulkCreateModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Create CTAs</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<script src="{{ url_for('static', path='/js/cta-matrix.js') }}"></script>
+{% endblock %}

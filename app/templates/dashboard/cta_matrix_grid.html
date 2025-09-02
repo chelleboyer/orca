@@ -1,0 +1,167 @@
+<!-- CTA Matrix Grid Partial - Loaded via HTMX -->
+<div class="matrix-grid-container">
+    {% if matrix_data.roles and matrix_data.objects %}
+    <div class="matrix-table-wrapper">
+        <table class="matrix-table">
+            <thead>
+                <tr>
+                    <th class="matrix-corner">
+                        <div class="corner-content">
+                            <span class="corner-label">Roles ↓</span>
+                            <span class="corner-separator">×</span>
+                            <span class="corner-label">Objects →</span>
+                        </div>
+                    </th>
+                    {% for object in matrix_data.objects %}
+                    <th class="matrix-object-header" data-object-id="{{ object.id }}">
+                        <div class="object-header-content">
+                            <span class="object-name" title="{{ object.name }}">{{ object.name }}</span>
+                            {% if object.core_noun %}
+                            <span class="object-core-noun">{{ object.core_noun }}</span>
+                            {% endif %}
+                        </div>
+                    </th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in matrix_data.rows %}
+                <tr class="matrix-row" data-role-id="{{ row.role_id }}">
+                    <th class="matrix-role-header">
+                        <div class="role-header-content">
+                            <span class="role-name">{{ row.role_name }}</span>
+                            {% if row.role_description %}
+                            <span class="role-description" title="{{ row.role_description }}">{{ row.role_description[:50] }}{% if row.role_description|length > 50 %}...{% endif %}</span>
+                            {% endif %}
+                        </div>
+                    </th>
+                    {% for cell in row.cells %}
+                    <td class="matrix-cell" 
+                        data-role-id="{{ cell.role_id }}" 
+                        data-object-id="{{ cell.object_id }}"
+                        data-cta-count="{{ cell.total_ctas }}">
+                        
+                        <div class="cell-content"
+                             hx-get="{% if is_demo %}/api/v1/demo/cta-cell/{{ cell.role_id }}/{{ cell.object_id }}{% else %}/api/v1/htmx/projects/{{ project_id }}/cta-cell/{{ cell.role_id }}/{{ cell.object_id }}{% endif %}"
+                             hx-trigger="click"
+                             hx-target="#ctaModal .modal-content"
+                             hx-swap="innerHTML">
+                            
+                            <!-- CRUD Indicators -->
+                            <div class="crud-indicators">
+                                {% if cell.has_create %}
+                                <span class="crud-indicator create-action" title="Create">C</span>
+                                {% endif %}
+                                {% if cell.has_read %}
+                                <span class="crud-indicator read-action" title="Read">R</span>
+                                {% endif %}
+                                {% if cell.has_update %}
+                                <span class="crud-indicator update-action" title="Update">U</span>
+                                {% endif %}
+                                {% if cell.has_delete %}
+                                <span class="crud-indicator delete-action" title="Delete">D</span>
+                                {% endif %}
+                                {% if cell.has_none %}
+                                <span class="crud-indicator none-action" title="Non-CRUD">N</span>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- CTA Count -->
+                            {% if cell.total_ctas > 0 %}
+                            <div class="cta-count">
+                                <span class="count-number">{{ cell.total_ctas }}</span>
+                                <span class="count-label">CTA{{ 's' if cell.total_ctas != 1 else '' }}</span>
+                            </div>
+                            {% else %}
+                            <div class="empty-cell">
+                                <span class="add-cta-hint">Click to add</span>
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Primary CTAs Preview -->
+                            {% if cell.primary_ctas %}
+                            <div class="primary-ctas-preview">
+                                {% for cta in cell.primary_ctas[:2] %}
+                                <div class="primary-cta-item" title="{{ cta.description }}">
+                                    {{ cta.verb or cta.crud_type|lower }}
+                                </div>
+                                {% endfor %}
+                                {% if cell.primary_ctas|length > 2 %}
+                                <div class="more-ctas">+{{ cell.primary_ctas|length - 2 }} more</div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Matrix Summary -->
+    <div class="matrix-summary">
+        <div class="summary-stats">
+            <div class="stat-item">
+                <span class="stat-number">{{ matrix_data.total_ctas }}</span>
+                <span class="stat-label">Total CTAs</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">{{ matrix_data.roles|length }}</span>
+                <span class="stat-label">Roles</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">{{ matrix_data.objects|length }}</span>
+                <span class="stat-label">Objects</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">{{ matrix_data.populated_cells }}</span>
+                <span class="stat-label">Populated Cells</span>
+            </div>
+        </div>
+        
+        <div class="matrix-actions">
+            {% if "export_data" in permissions %}
+            <button class="btn btn-outline" onclick="exportMatrix()">
+                <i class="icon-download"></i>
+                Export Matrix
+            </button>
+            {% endif %}
+            
+            {% if "edit_ctas" in permissions %}
+            <button class="btn btn-outline" onclick="generateUserStories()">
+                <i class="icon-document"></i>
+                Generate User Stories
+            </button>
+            {% endif %}
+        </div>
+    </div>
+    
+    {% else %}
+    <!-- Empty State -->
+    <div class="matrix-empty-state">
+        <div class="empty-state-icon">
+            <i class="icon-grid"></i>
+        </div>
+        <h3>No Matrix Data Available</h3>
+        <p>You need both roles and objects to create the CTA matrix.</p>
+        
+        <div class="empty-state-actions">
+            {% if not matrix_data.roles %}
+                        <a href="#" onclick="alert('Roles management coming in Epic 5!')" class="btn btn-primary">
+                <i class="icon-plus"></i>
+                Add Roles
+            </a>
+            {% endif %}
+            
+            {% if not matrix_data.objects %}
+            <a href="#" onclick="alert('Objects management coming in Epic 5!')" class="btn btn-primary">
+                <i class="icon-box"></i>
+                Create Objects
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>

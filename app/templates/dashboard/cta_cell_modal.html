@@ -1,0 +1,240 @@
+<!-- CTA Cell Edit Modal Content - Loaded via HTMX -->
+<div class="modal-header">
+    <h3>CTAs: {{ role_name }} × {{ object_name }}</h3>
+    <button class="modal-close" onclick="hideCTAModal()">&times;</button>
+</div>
+
+<div class="modal-body">
+    <!-- Existing CTAs -->
+    <div class="existing-ctas">
+        <h4>Existing CTAs</h4>
+        
+        {% if existing_ctas %}
+        <div class="cta-list">
+            {% for cta in existing_ctas %}
+            <div class="cta-item" data-cta-id="{{ cta.id }}">
+                <div class="cta-header">
+                    <div class="cta-main-info">
+                        <span class="crud-badge crud-{{ cta.crud_type|lower }}">{{ cta.crud_type }}</span>
+                        <span class="cta-description">{{ cta.description or 'No description' }}</span>
+                        {% if cta.is_primary %}
+                        <span class="primary-badge">Primary</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="cta-actions">
+                        <button class="btn-icon" 
+                                onclick="editCTA('{{ cta.id }}')"
+                                title="Edit CTA">
+                            <i class="icon-edit"></i>
+                        </button>
+                        <button class="btn-icon btn-danger" 
+                                onclick="deleteCTA('{{ cta.id }}')"
+                                title="Delete CTA">
+                            <i class="icon-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                {% if cta.business_value or cta.priority %}
+                <div class="cta-meta">
+                    {% if cta.business_value %}
+                    <span class="meta-item">
+                        <strong>Value:</strong> {{ cta.business_value }}
+                    </span>
+                    {% endif %}
+                    {% if cta.priority %}
+                    <span class="meta-item">
+                        <strong>Priority:</strong> {{ cta.priority }}/5
+                    </span>
+                    {% endif %}
+                </div>
+                {% endif %}
+                
+                {% if cta.preconditions or cta.postconditions %}
+                <div class="cta-conditions">
+                    {% if cta.preconditions %}
+                    <div class="condition-item">
+                        <strong>Pre:</strong> {{ cta.preconditions }}
+                    </div>
+                    {% endif %}
+                    {% if cta.postconditions %}
+                    <div class="condition-item">
+                        <strong>Post:</strong> {{ cta.postconditions }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-ctas">
+            <p>No CTAs defined for this role-object combination.</p>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Add New CTA Form -->
+    {% if "edit_ctas" in permissions %}
+    <div class="add-cta-section">
+        <h4>Add New CTA</h4>
+        
+        <form id="addCTAForm" 
+              hx-post="/api/v1/projects/{{ project_id }}/ctas"
+              hx-target="#addCTAResult"
+              hx-indicator="#addCTALoading">
+            
+            <input type="hidden" name="role_id" value="{{ role_id }}">
+            <input type="hidden" name="object_id" value="{{ object_id }}">
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="crudType">CRUD Type *</label>
+                    <select id="crudType" name="crud_type" required onchange="updateDescriptionPlaceholder()">
+                        <option value="">Select CRUD Type</option>
+                        <option value="CREATE">Create</option>
+                        <option value="READ">Read</option>
+                        <option value="UPDATE">Update</option>
+                        <option value="DELETE">Delete</option>
+                        <option value="NONE">Non-CRUD</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="priority">Priority</label>
+                    <select id="priority" name="priority">
+                        <option value="1">1 - Low</option>
+                        <option value="2">2</option>
+                        <option value="3" selected>3 - Medium</option>
+                        <option value="4">4</option>
+                        <option value="5">5 - High</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Description *</label>
+                <input type="text" 
+                       id="description" 
+                       name="description" 
+                       placeholder="e.g., Create new user account"
+                       required
+                       maxlength="255">
+                <small class="form-help">Describe what the user can do with this object</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="businessValue">Business Value</label>
+                <textarea id="businessValue" 
+                          name="business_value" 
+                          placeholder="Why is this action valuable to the business?"
+                          rows="2"></textarea>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="preconditions">Preconditions</label>
+                    <textarea id="preconditions" 
+                              name="preconditions" 
+                              placeholder="What must be true before this action?"
+                              rows="2"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="postconditions">Postconditions</label>
+                    <textarea id="postconditions" 
+                              name="postconditions" 
+                              placeholder="What changes after this action?"
+                              rows="2"></textarea>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="isPrimary" name="is_primary">
+                    <span>Mark as primary CTA for this object</span>
+                </label>
+                <small class="form-help">Primary CTAs are the most common actions for this role-object combination</small>
+            </div>
+            
+            <div id="addCTAResult"></div>
+            <div id="addCTALoading" class="loading-indicator" style="display: none;">
+                <span>Adding CTA...</span>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="hideCTAModal()">Close</button>
+                <button type="submit" class="btn btn-primary">Add CTA</button>
+            </div>
+        </form>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+// Update description placeholder based on CRUD type
+function updateDescriptionPlaceholder() {
+    const crudType = document.getElementById('crudType').value;
+    const description = document.getElementById('description');
+    const roleObjectText = '{{ role_name|lower }} {{ object_name|lower }}';
+    
+    const placeholders = {
+        'CREATE': `Create new ${roleObjectText}`,
+        'READ': `View ${roleObjectText}`,
+        'UPDATE': `Edit ${roleObjectText}`,
+        'DELETE': `Delete ${roleObjectText}`,
+        'NONE': `Interact with ${roleObjectText}`
+    };
+    
+    description.placeholder = placeholders[crudType] || 'Describe the action';
+}
+
+// Handle successful CTA creation
+document.body.addEventListener('htmx:afterRequest', function(event) {
+    if (event.detail.target.id === 'addCTAResult' && event.detail.xhr.status === 200) {
+        // Clear form
+        document.getElementById('addCTAForm').reset();
+        // Refresh the matrix
+        htmx.trigger('#matrix-grid', 'refresh');
+        // Show success message
+        event.detail.target.innerHTML = '<div class="alert alert-success">CTA added successfully!</div>';
+        setTimeout(() => {
+            event.detail.target.innerHTML = '';
+        }, 3000);
+    }
+});
+
+// Edit CTA function
+function editCTA(ctaId) {
+    // This would open another modal or inline edit form
+    console.log('Edit CTA:', ctaId);
+    // Implementation would go here
+}
+
+// Delete CTA function
+function deleteCTA(ctaId) {
+    if (confirm('Are you sure you want to delete this CTA?')) {
+        fetch(`/api/v1/projects/{{ project_id }}/ctas/${ctaId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                // Remove the CTA from the UI
+                document.querySelector(`[data-cta-id="${ctaId}"]`).remove();
+                // Refresh the matrix
+                htmx.trigger('#matrix-grid', 'refresh');
+            } else {
+                alert('Failed to delete CTA');
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting CTA:', error);
+            alert('Error deleting CTA');
+        });
+    }
+}
+</script>

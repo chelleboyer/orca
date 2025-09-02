@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTA Matrix - Simple Test</title>
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { background: #f5f5f5; padding: 20px; margin: 20px 0; border-radius: 8px; }
+        .matrix-grid { border: 1px solid #ddd; min-height: 200px; padding: 20px; }
+        .loading { text-align: center; color: #666; }
+    </style>
+</head>
+<body>
+    <h1>🎯 CTA Matrix Test Page</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Static Content</h2>
+        <p>✅ This content loads directly from the template</p>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 2: HTMX Grid Loading</h2>
+        <div id="matrix-grid" 
+             class="matrix-grid"
+             hx-get="/api/v1/demo/cta-matrix-grid" 
+             hx-trigger="load"
+             hx-indicator="#loading">
+            <div id="loading" class="loading">Loading matrix...</div>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 3: Manual Grid Refresh</h2>
+        <button hx-get="/api/v1/demo/cta-matrix-grid" 
+                hx-target="#matrix-grid" 
+                hx-indicator="#loading">
+            Refresh Grid
+        </button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Debug Info</h2>
+        <p>Server time: {{ request.url }}</p>
+        <p>Available endpoints:</p>
+        <ul>
+            <li><a href="/api/v1/demo/cta-matrix-grid" target="_blank">/api/v1/demo/cta-matrix-grid</a></li>
+            <li><a href="/health" target="_blank">/health</a></li>
+            <li><a href="/docs" target="_blank">/docs</a></li>
+        </ul>
+    </div>
+</body>
+</html>
