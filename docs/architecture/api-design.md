@@ -38,6 +38,20 @@ PUT    /api/v1/attributes/{id}            # Update attribute
 DELETE /api/v1/attributes/{id}            # Delete attribute
 ```
 
+### Prioritization Operations ✅ **NEW - Epic 6.1**
+```
+GET    /api/v1/projects/{id}/prioritizations          # List project prioritizations
+POST   /api/v1/projects/{id}/prioritizations          # Create prioritization
+GET    /api/v1/prioritizations/{id}                  # Get prioritization details
+PUT    /api/v1/prioritizations/{id}                  # Update prioritization
+DELETE /api/v1/prioritizations/{id}                  # Delete prioritization
+GET    /api/v1/projects/{id}/prioritizations/board    # Get prioritization board (Now/Next/Later)
+GET    /api/v1/projects/{id}/prioritizations/stats    # Get prioritization statistics
+POST   /api/v1/projects/{id}/prioritizations/bulk-update  # Bulk update prioritizations
+POST   /api/v1/projects/{id}/prioritizations/snapshots   # Create prioritization snapshot
+GET    /api/v1/projects/{id}/prioritizations/snapshots   # List prioritization snapshots
+```
+
 ### Export Operations
 ```
 POST   /api/v1/projects/{id}/export       # Request export job
@@ -77,4 +91,10 @@ relationship_deleted: { relationship_id: UUID, deleted_by: UUID }
 // Real-time editing
 editing_started: { entity_type: string, entity_id: UUID, user_id: UUID }
 editing_ended: { entity_type: string, entity_id: UUID, user_id: UUID }
+
+// Prioritization operations ✅ **NEW - Epic 6.1**
+prioritization_created: { prioritization: Prioritization, created_by: UUID }
+prioritization_updated: { prioritization_id: UUID, changes: object, updated_by: UUID }
+prioritization_deleted: { prioritization_id: UUID, deleted_by: UUID }
+prioritization_bulk_updated: { updates: Array<Prioritization>, updated_by: UUID }
 ```

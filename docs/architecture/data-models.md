@@ -101,6 +101,36 @@ class Attribute(Base):
     updated_at: datetime
 ```
 
+## Prioritization Models
+
+### Prioritization Entity
+```python
+class Prioritization(Base):
+    id: UUID (Primary Key)
+    project_id: UUID (Foreign Key → Project)
+    item_type: ItemType (enum: object, cta, attribute, relationship)
+    item_id: UUID (item being prioritized)
+    priority_phase: PriorityPhase (enum: now, next, later, unassigned)
+    score: Optional[int] (1-10 priority scoring)
+    position: int (order within phase)
+    notes: Optional[str] (prioritization rationale)
+    assigned_by: UUID (Foreign Key → User)
+    assigned_at: datetime
+    updated_at: datetime
+```
+
+### Prioritization Snapshot Entity
+```python
+class PrioritizationSnapshot(Base):
+    id: UUID (Primary Key)
+    project_id: UUID (Foreign Key → Project)
+    snapshot_name: str
+    description: Optional[str]
+    created_by: UUID (Foreign Key → User)
+    created_at: datetime
+    snapshot_data: JSON (serialized prioritization state)
+```
+
 ## Collaboration Models
 
 ### Session Management

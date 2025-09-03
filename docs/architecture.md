@@ -196,6 +196,34 @@ class Attribute(Base):
     updated_at: datetime
 ```
 
+#### Prioritization Entity
+```python
+class Prioritization(Base):
+    id: UUID (Primary Key)
+    project_id: UUID (Foreign Key → Project)
+    item_type: ItemType (enum: object, cta, attribute, relationship)
+    item_id: UUID (item being prioritized)
+    priority_phase: PriorityPhase (enum: now, next, later, unassigned)
+    score: Optional[int] (1-10 priority scoring)
+    position: int (order within phase)
+    notes: Optional[str]
+    assigned_by: UUID (Foreign Key → User)
+    assigned_at: datetime
+    updated_at: datetime
+```
+
+#### Prioritization Snapshot Entity
+```python
+class PrioritizationSnapshot(Base):
+    id: UUID (Primary Key)
+    project_id: UUID (Foreign Key → Project)
+    snapshot_name: str
+    description: Optional[str]
+    created_by: UUID (Foreign Key → User)
+    created_at: datetime
+    snapshot_data: JSON (serialized prioritization state)
+```
+
 ### Collaboration Models
 
 #### Session Management
@@ -256,6 +284,7 @@ class ExportJob(Base):
 #### Business Logic Components
 - **Project Service**: Project lifecycle, membership, and access control
 - **Matrix Service**: ORCA matrix operations, validation, and business rules
+- **Prioritization Service**: Now/Next/Later prioritization, scoring, and bulk operations
 - **Collaboration Service**: Real-time synchronization and conflict resolution
 - **Export Service**: Multi-format document generation and job management
 - **User Service**: Authentication, authorization, and user management
@@ -324,6 +353,17 @@ GET    /api/v1/objects/{id}/attributes    # List object attributes
 POST   /api/v1/objects/{id}/attributes    # Create attribute
 PUT    /api/v1/attributes/{id}            # Update attribute
 DELETE /api/v1/attributes/{id}            # Delete attribute
+
+GET    /api/v1/projects/{id}/prioritizations      # List project prioritizations
+POST   /api/v1/projects/{id}/prioritizations      # Create prioritization
+GET    /api/v1/prioritizations/{id}              # Get prioritization details
+PUT    /api/v1/prioritizations/{id}              # Update prioritization
+DELETE /api/v1/prioritizations/{id}              # Delete prioritization
+GET    /api/v1/projects/{id}/prioritizations/board    # Get prioritization board
+GET    /api/v1/projects/{id}/prioritizations/stats    # Get prioritization statistics
+POST   /api/v1/projects/{id}/prioritizations/bulk-update  # Bulk update prioritizations
+POST   /api/v1/projects/{id}/prioritizations/snapshots   # Create prioritization snapshot
+GET    /api/v1/projects/{id}/prioritizations/snapshots   # List prioritization snapshots
 ```
 
 #### Export Operations
