@@ -1,0 +1,478 @@
+/* Object Map Visualization Styles */
+
+.object-map-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background: #fafafa;
+}
+
+/* Header Styles */
+.object-map-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: white;
+    border-bottom: 1px solid #e0e0e0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.map-title-section {
+    flex: 1;
+}
+
+.map-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin: 0 0 0.25rem 0;
+}
+
+.map-description {
+    color: #718096;
+    font-size: 0.95rem;
+    margin: 0 0 0.5rem 0;
+}
+
+.breadcrumb {
+    font-size: 0.875rem;
+    color: #4a5568;
+}
+
+.breadcrumb a {
+    color: #3182ce;
+    text-decoration: none;
+}
+
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.breadcrumb-separator {
+    margin: 0 0.5rem;
+    color: #a0aec0;
+}
+
+.breadcrumb-current {
+    color: #4a5568;
+    font-weight: 500;
+}
+
+.map-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Controls Styles */
+.map-controls {
+    display: flex;
+    gap: 2rem;
+    padding: 1rem 2rem;
+    background: white;
+    border-bottom: 1px solid #e0e0e0;
+    align-items: center;
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.control-group label {
+    font-weight: 500;
+    color: #4a5568;
+}
+
+.control-group input[type="checkbox"] {
+    margin-right: 0.25rem;
+}
+
+.control-group select {
+    padding: 0.25rem 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    background: white;
+}
+
+.btn-small {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    min-width: 30px;
+}
+
+#zoom-level {
+    min-width: 50px;
+    text-align: center;
+    font-weight: 500;
+}
+
+/* Statistics Panel */
+.map-statistics {
+    display: flex;
+    gap: 2rem;
+    padding: 0.75rem 2rem;
+    background: #f7fafc;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 0.875rem;
+}
+
+.stat-item {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.stat-label {
+    color: #718096;
+    font-weight: 500;
+}
+
+.stat-value {
+    color: #2d3748;
+    font-weight: 600;
+}
+
+/* Map Canvas */
+.map-canvas-container {
+    position: relative;
+    flex: 1;
+    overflow: hidden;
+    background: white;
+}
+
+.object-map-canvas {
+    width: 100%;
+    height: 100%;
+    cursor: grab;
+}
+
+.object-map-canvas:active {
+    cursor: grabbing;
+}
+
+.grid-background {
+    opacity: 0.5;
+}
+
+.grid-background.hidden {
+    opacity: 0;
+}
+
+/* Object Card Styles */
+.object-card {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.object-card:hover {
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+}
+
+.object-card.selected {
+    filter: drop-shadow(0 6px 12px rgba(59, 130, 246, 0.3));
+}
+
+.object-card rect {
+    fill: white;
+    stroke: #d1d5db;
+    stroke-width: 2;
+    rx: 8;
+}
+
+.object-card.core rect {
+    stroke: #3182ce;
+    stroke-width: 3;
+}
+
+.object-card:hover rect {
+    stroke: #2563eb;
+    fill: #f8fafc;
+}
+
+.object-name {
+    font-size: 14px;
+    font-weight: 600;
+    fill: #1a202c;
+    text-anchor: middle;
+    dominant-baseline: middle;
+}
+
+.object-definition {
+    font-size: 11px;
+    fill: #4a5568;
+    text-anchor: middle;
+    dominant-baseline: middle;
+}
+
+.attribute-label {
+    font-size: 10px;
+    fill: #718096;
+    text-anchor: start;
+}
+
+.attribute-value {
+    font-size: 10px;
+    fill: #2d3748;
+    text-anchor: start;
+    font-weight: 500;
+}
+
+.attribute-type-indicator {
+    font-size: 9px;
+    fill: #9ca3af;
+    text-anchor: end;
+}
+
+/* Core attribute highlighting */
+.core-attribute .attribute-label {
+    fill: #3182ce;
+    font-weight: 600;
+}
+
+.core-attribute .attribute-value {
+    fill: #1e40af;
+}
+
+/* Relationship Lines */
+.relationship-line {
+    stroke: #6b7280;
+    stroke-width: 2;
+    fill: none;
+    marker-end: url(#arrowhead);
+}
+
+.relationship-line:hover {
+    stroke: #374151;
+    stroke-width: 3;
+}
+
+.relationship-line.bidirectional {
+    marker-start: url(#arrowhead);
+}
+
+.cardinality-label {
+    font-size: 11px;
+    fill: #4a5568;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    background: white;
+    padding: 2px 4px;
+}
+
+/* Arrow markers */
+.arrow-marker {
+    fill: #6b7280;
+}
+
+/* Detail Panel */
+.detail-panel {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 320px;
+    max-height: calc(100% - 40px);
+    background: white;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: #f7fafc;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.panel-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.panel-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #718096;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.panel-close:hover {
+    color: #4a5568;
+}
+
+.panel-content {
+    padding: 1rem;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.detail-section {
+    margin-bottom: 1.5rem;
+}
+
+.detail-section h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #4a5568;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.detail-section p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #2d3748;
+    line-height: 1.5;
+}
+
+.attributes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.attribute-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    background: #f7fafc;
+    border-radius: 4px;
+    font-size: 0.875rem;
+}
+
+.attribute-item.core {
+    background: #eff6ff;
+    border-left: 3px solid #3182ce;
+}
+
+.attribute-name {
+    font-weight: 500;
+    color: #2d3748;
+}
+
+.attribute-value-display {
+    color: #4a5568;
+    font-family: monospace;
+}
+
+.attribute-type {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.detail-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+/* Loading Overlay */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e2e8f0;
+    border-top: 4px solid #3182ce;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-overlay p {
+    color: #4a5568;
+    font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .object-map-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+    
+    .map-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+    
+    .map-controls {
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .detail-panel {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        max-width: 400px;
+        max-height: none;
+        border-radius: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .object-map-header {
+        padding: 1rem;
+    }
+    
+    .map-controls {
+        padding: 1rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    
+    .map-statistics {
+        flex-wrap: wrap;
+        gap: 1rem;
+        padding: 0.75rem 1rem;
+    }
+    
+    .detail-panel {
+        width: 100%;
+        max-width: none;
+    }
+}

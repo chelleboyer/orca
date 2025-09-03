@@ -42,6 +42,9 @@ class Object(Base):
     # CTA connections for behavioral matrix
     ctas = relationship("CTA", back_populates="object", cascade="all, delete-orphan")
     
+    # Attribute connections for object properties
+    object_attributes = relationship("ObjectAttribute", back_populates="object", cascade="all, delete-orphan")
+    
     # Indexes for performance
     __table_args__ = (
         Index('ix_objects_project_name', 'project_id', 'name'),

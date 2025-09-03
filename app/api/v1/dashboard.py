@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.permissions import get_current_user, require_project_access
-from app.models import User
+from app.models import User, Project
 from app.services.dashboard_service import DashboardService
 from app.services.cta_service import CTAService
 from app.core.exceptions import NotFoundError, PermissionError
@@ -591,6 +591,84 @@ async def cta_matrix_grid_demo_htmx(
             }
         )
     
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
+@router.get(
+    "/projects/{project_id}/object-map",
+    response_class=HTMLResponse,
+    summary="Object Map Page",
+    description="Render the Object Map visualization page"
+)
+async def object_map_page(
+    request: Request,
+    project_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Render Object Map visualization page"""
+    try:
+        # Get project info
+        project = db.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+
+        # Verify user has access to project
+        # TODO: Add proper permission checking here
+        
+        return templates.TemplateResponse(
+            "dashboard/object_map.html",
+            {
+                "request": request,
+                "project": project,
+                "current_user": current_user,
+                # Add permission checking later
+                "permissions": ["view_objects", "edit_objects", "view_relationships"]
+            }
+        )
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
+@router.get(
+    "/projects/{project_id}/object-cards",
+    response_class=HTMLResponse,
+    summary="Object Cards Page",
+    description="Render the Object Cards interface page"
+)
+async def object_cards_page(
+    request: Request,
+    project_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Render Object Cards page"""
+    try:
+        # Get project info
+        project = db.query(Project).filter(Project.id == project_id).first()
+        if not project:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+
+        # Verify user has access to project
+        # TODO: Add proper permission checking here
+        
+        return templates.TemplateResponse(
+            "dashboard/object_cards.html",
+            {
+                "request": request,
+                "project": project,
+                "current_user": current_user,
+                # Add permission checking later
+                "permissions": ["view_objects", "edit_objects", "create_objects", "export_objects"]
+            }
+        )
+    
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 

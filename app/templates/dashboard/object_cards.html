@@ -1,0 +1,243 @@
+{% extends "app_base.html" %}
+
+{% block title %}Object Cards - {{ project.title }}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/object-cards.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="object-cards-container" id="objectCardsContainer">
+    <!-- Header Section -->
+    <div class="cards-header mb-6">
+        <div class="flex justify-between items-center mb-4">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">Object Cards</h1>
+                <p class="text-gray-600 mt-1">{{ project.title }} - Visual object overview with completion status</p>
+            </div>
+            <div class="flex space-x-3">
+                <button id="refreshCards" class="btn btn-secondary">
+                    <i class="fas fa-sync-alt mr-2"></i>Refresh
+                </button>
+                <a href="/dashboard/projects/{{ project.id }}/objects/create" class="btn btn-primary">
+                    <i class="fas fa-plus mr-2"></i>Add Object
+                </a>
+            </div>
+        </div>
+
+        <!-- Statistics Bar -->
+        <div id="statisticsBar" class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-blue-600" id="totalObjects">-</div>
+                    <div class="text-sm text-gray-600">Total Objects</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-green-600" id="withDefinitions">-</div>
+                    <div class="text-sm text-gray-600">With Definitions</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-purple-600" id="withAttributes">-</div>
+                    <div class="text-sm text-gray-600">With Attributes</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-orange-600" id="withRelationships">-</div>
+                    <div class="text-sm text-gray-600">With Relationships</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-indigo-600" id="averageCompletion">-</div>
+                    <div class="text-sm text-gray-600">Avg Completion</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls Section -->
+        <div class="controls-section bg-white border border-gray-200 rounded-lg p-4">
+            <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-4">
+                <!-- Search -->
+                <div class="col-span-1">
+                    <label for="searchQuery" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                    <input 
+                        type="text" 
+                        id="searchQuery" 
+                        placeholder="Search objects..."
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                </div>
+
+                <!-- Layout Toggle -->
+                <div class="col-span-1">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Layout</label>
+                    <div class="flex border border-gray-300 rounded-md overflow-hidden">
+                        <button id="gridLayout" class="flex-1 px-3 py-2 bg-blue-600 text-white text-sm font-medium">
+                            <i class="fas fa-th mr-1"></i>Grid
+                        </button>
+                        <button id="listLayout" class="flex-1 px-3 py-2 bg-gray-100 text-gray-700 text-sm font-medium">
+                            <i class="fas fa-list mr-1"></i>List
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Completion Filters -->
+                <div class="col-span-1">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Filter by Completion</label>
+                    <select id="completionFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">All Objects</option>
+                        <option value="complete">Complete Objects</option>
+                        <option value="incomplete">Incomplete Objects</option>
+                        <option value="has_definition">Has Definition</option>
+                        <option value="no_definition">Missing Definition</option>
+                        <option value="has_attributes">Has Attributes</option>
+                        <option value="no_attributes">Missing Attributes</option>
+                        <option value="has_core_attributes">Has Core Attributes</option>
+                        <option value="no_core_attributes">Missing Core Attributes</option>
+                        <option value="has_relationships">Has Relationships</option>
+                        <option value="no_relationships">Missing Relationships</option>
+                    </select>
+                </div>
+
+                <!-- Sort Options -->
+                <div class="col-span-1">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
+                    <select id="sortBy" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="name">Name (A-Z)</option>
+                        <option value="name_desc">Name (Z-A)</option>
+                        <option value="created_at">Oldest First</option>
+                        <option value="created_at_desc">Newest First</option>
+                        <option value="updated_at_desc">Recently Updated</option>
+                        <option value="definition">Definition (A-Z)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Advanced Filters (Collapsible) -->
+            <div class="mt-4">
+                <button id="toggleAdvancedFilters" class="text-sm text-blue-600 hover:text-blue-800">
+                    <i class="fas fa-chevron-down mr-1"></i>Advanced Filters
+                </button>
+                <div id="advancedFilters" class="hidden mt-3 grid grid-cols-1 md:grid-cols-3 gap-4 pt-3 border-t border-gray-200">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Min Attributes</label>
+                        <input type="number" id="minAttributes" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Max Attributes</label>
+                        <input type="number" id="maxAttributes" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Attribute Type</label>
+                        <select id="attributeType" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                            <option value="">Any Type</option>
+                            <option value="text">Text</option>
+                            <option value="number">Number</option>
+                            <option value="date">Date</option>
+                            <option value="boolean">Boolean</option>
+                            <option value="reference">Reference</option>
+                            <option value="list">List</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards Container -->
+    <div id="cardsContainer" class="cards-container">
+        <!-- Loading State -->
+        <div id="loadingState" class="text-center py-12">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p class="text-gray-600">Loading object cards...</p>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden text-center py-12">
+            <div class="mx-auto h-12 w-12 text-gray-400 mb-4">
+                <i class="fas fa-cube text-4xl"></i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">No objects found</h3>
+            <p class="text-gray-600 mb-4">Try adjusting your filters or create your first object.</p>
+            <a href="/dashboard/projects/{{ project.id }}/objects/create" class="btn btn-primary">
+                <i class="fas fa-plus mr-2"></i>Create Object
+            </a>
+        </div>
+
+        <!-- Grid Layout -->
+        <div id="gridContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Cards will be populated here -->
+        </div>
+
+        <!-- List Layout -->
+        <div id="listContainer" class="hidden space-y-4">
+            <!-- List items will be populated here -->
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <div id="paginationContainer" class="hidden mt-6 flex items-center justify-between">
+        <div class="text-sm text-gray-700">
+            Showing <span id="showingFrom">1</span> to <span id="showingTo">20</span> of <span id="totalCount">0</span> objects
+        </div>
+        <div class="flex space-x-2">
+            <button id="prevPage" class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" disabled>
+                Previous
+            </button>
+            <span id="pageNumbers" class="flex space-x-1">
+                <!-- Page numbers will be populated here -->
+            </span>
+            <button id="nextPage" class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" disabled>
+                Next
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Action Modal -->
+<div id="quickActionModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <h3 class="text-lg font-medium text-gray-900 mb-4" id="modalTitle">Quick Action</h3>
+            <div id="modalContent" class="mb-4">
+                <!-- Modal content will be populated here -->
+            </div>
+            <div class="flex justify-end space-x-3">
+                <button id="modalCancel" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">Cancel</button>
+                <button id="modalConfirm" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Template data -->
+<script type="application/json" id="template-data">
+{
+    "projectId": "{{ project.id }}",
+    "csrfToken": "{{ csrf_token if csrf_token else '' }}",
+    "currentUser": {
+        "id": "{{ current_user.id if current_user else '' }}",
+        "name": "{{ current_user.name if current_user else '' }}",
+        "permissions": {% if permissions %}{{ permissions | tojson | safe }}{% else %}[]{% endif %}
+    }
+}
+</script>
+
+<script src="{{ url_for('static', path='js/object-cards.js') }}"></script>
+<script>
+    // Initialize object cards with project data
+    document.addEventListener('DOMContentLoaded', function() {
+        // Load template data from JSON script tag
+        const templateData = JSON.parse(document.getElementById('template-data').textContent);
+        
+        const objectCards = new ObjectCards({
+            projectId: templateData.projectId,
+            apiBaseUrl: '/api/v1',
+            csrfToken: templateData.csrfToken,
+            currentUser: templateData.currentUser
+        });
+        
+        // Make globally available for debugging
+        window.objectCards = objectCards;
+    });
+</script>
+{% endblock %}

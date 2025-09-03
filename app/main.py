@@ -19,6 +19,8 @@ from app.api.v1 import dashboard
 from app.api.v1 import objects
 from app.api.v1 import relationships
 from app.api.v1 import roles, ctas
+from app.api.v1 import object_map
+from app.api.v1 import object_cards
 # from app.api.v1 import attributes, exports
 # from app.api import websocket
 
@@ -67,6 +69,11 @@ app.include_router(objects.router, prefix="/api/v1")
 app.include_router(relationships.router, prefix="/api/v1")
 app.include_router(roles.router, prefix="/api/v1")
 app.include_router(ctas.router, prefix="/api/v1")
+app.include_router(object_map.router, prefix="/api/v1")
+app.include_router(object_cards.router, prefix="/api/v1")
+
+# Include HTML dashboard routes (no prefix for frontend pages)
+app.include_router(dashboard.router, prefix="/dashboard", tags=["dashboard-html"])
 # app.include_router(attributes.router, prefix="/api/v1/attributes", tags=["attributes"])
 # app.include_router(exports.router, prefix="/api/v1/exports", tags=["exports"])
 # app.include_router(websocket.router, prefix="/api/v1/websocket", tags=["websocket"])

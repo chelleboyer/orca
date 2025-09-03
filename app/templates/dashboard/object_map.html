@@ -1,0 +1,174 @@
+<!-- Object Map Visualization Template -->
+{% extends "app_base.html" %}
+
+{% block title %}{{ project.title }} - Object Map{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', path='/css/dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', path='/css/object-map.css') }}">
+<script src="https://unpkg.com/htmx.org@1.9.6"></script>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="object-map-container">
+    <!-- Header Section -->
+    <header class="object-map-header">
+        <div class="map-title-section">
+            <h1 class="map-title">Object Map</h1>
+            <p class="map-description">Visual representation of objects, attributes, and relationships</p>
+            <nav class="breadcrumb">
+                <a href="#" onclick="window.history.back()">{{ project.title }}</a>
+                <span class="breadcrumb-separator">→</span>
+                <span class="breadcrumb-current">Object Map</span>
+            </nav>
+        </div>
+        
+        <div class="map-actions">
+            <button class="btn btn-secondary" onclick="autoLayout()">
+                <i class="icon-grid"></i>
+                Auto Layout
+            </button>
+            <button class="btn btn-secondary" onclick="exportMap('png')">
+                <i class="icon-download"></i>
+                Export PNG
+            </button>
+            <button class="btn btn-secondary" onclick="exportMap('svg')">
+                <i class="icon-download"></i>
+                Export SVG
+            </button>
+            <button class="btn btn-primary" onclick="refreshMap()">
+                <i class="icon-refresh"></i>
+                Refresh
+            </button>
+        </div>
+    </header>
+
+    <!-- Map Controls -->
+    <div class="map-controls">
+        <div class="control-group">
+            <label>Zoom:</label>
+            <button class="btn btn-small" onclick="zoomIn()">+</button>
+            <span id="zoom-level">100%</span>
+            <button class="btn btn-small" onclick="zoomOut()">-</button>
+            <button class="btn btn-small" onclick="resetZoom()">Reset</button>
+        </div>
+        
+        <div class="control-group">
+            <label>
+                <input type="checkbox" id="show-grid" checked onchange="toggleGrid()">
+                Show Grid
+            </label>
+        </div>
+        
+        <div class="control-group">
+            <label>
+                <input type="checkbox" id="show-attributes" checked onchange="toggleAttributes()">
+                Show Attributes
+            </label>
+        </div>
+        
+        <div class="control-group">
+            <label>Layout:</label>
+            <select id="layout-algorithm" onchange="changeLayout()">
+                <option value="manual">Manual</option>
+                <option value="force_directed">Force Directed</option>
+                <option value="hierarchical">Hierarchical</option>
+                <option value="circular">Circular</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Statistics Panel -->
+    <div class="map-statistics" id="map-stats">
+        <div class="stat-item">
+            <span class="stat-label">Objects:</span>
+            <span class="stat-value" id="object-count">-</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Relationships:</span>
+            <span class="stat-value" id="relationship-count">-</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Attributes:</span>
+            <span class="stat-value" id="attribute-count">-</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Complexity:</span>
+            <span class="stat-value" id="complexity-score">-</span>
+        </div>
+    </div>
+
+    <!-- Main Map Canvas -->
+    <div class="map-canvas-container">
+        <div id="map-loading" class="loading-overlay" style="display: none;">
+            <div class="loading-spinner"></div>
+            <p>Loading object map...</p>
+        </div>
+        
+        <svg id="object-map-svg" class="object-map-canvas">
+            <!-- Grid background -->
+            <defs>
+                <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
+                    <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#f0f0f0" stroke-width="1"/>
+                </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#grid)" class="grid-background"/>
+            
+            <!-- Map content groups -->
+            <g id="map-content">
+                <g id="relationships-group"></g>
+                <g id="objects-group"></g>
+                <g id="labels-group"></g>
+            </g>
+        </svg>
+        
+        <!-- Object detail panel -->
+        <div id="object-detail-panel" class="detail-panel" style="display: none;">
+            <div class="panel-header">
+                <h3 id="detail-object-name">Object Details</h3>
+                <button class="panel-close" onclick="closeDetailPanel()">&times;</button>
+            </div>
+            <div class="panel-content">
+                <div class="detail-section">
+                    <h4>Definition</h4>
+                    <p id="detail-object-definition">-</p>
+                </div>
+                <div class="detail-section">
+                    <h4>Core Attributes</h4>
+                    <div id="detail-core-attributes" class="attributes-list">
+                        <!-- Core attributes will be populated here -->
+                    </div>
+                </div>
+                <div class="detail-section">
+                    <h4>All Attributes</h4>
+                    <div id="detail-all-attributes" class="attributes-list">
+                        <!-- All attributes will be populated here -->
+                    </div>
+                </div>
+                <div class="detail-actions">
+                    <button class="btn btn-secondary" onclick="editObject()">
+                        <i class="icon-edit"></i>
+                        Edit Object
+                    </button>
+                    <button class="btn btn-secondary" onclick="viewRelationships()">
+                        <i class="icon-link"></i>
+                        View Relationships
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden data container for JavaScript -->
+<script type="application/json" id="project-data">
+{
+    "project_id": "{{ project.id }}",
+    "project_title": "{{ project.title }}",
+    "api_base": "/api/v1"
+}
+</script>
+
+<script src="{{ url_for('static', path='/js/object-map.js') }}"></script>
+{% endblock %}
