@@ -618,8 +618,216 @@
     .summary-stats {
         justify-content: space-around;
     }
-    
-    .form-row {
-        flex-direction: column;
-    }
 }
+
+/* Enhanced Condition Display Styles */
+.cta-conditions {
+    margin-top: 0.75rem;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 0.75rem;
+}
+
+.condition-item {
+    margin-bottom: 0.75rem;
+    padding: 0.75rem;
+    border-radius: 6px;
+    background-color: #f8fafc;
+    border-left: 4px solid #d1d5db;
+}
+
+.condition-item.condition-pre {
+    border-left-color: #10b981; /* Green for preconditions */
+    background-color: #ecfdf5;
+}
+
+.condition-item.condition-post {
+    border-left-color: #3b82f6; /* Blue for postconditions */
+    background-color: #eff6ff;
+}
+
+.condition-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.condition-type-badge {
+    font-size: 0.75rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    background-color: #e5e7eb;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.condition-pre .condition-type-badge {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.condition-post .condition-type-badge {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.condition-content {
+    color: #6b7280;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.cta-acceptance {
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+    border-radius: 6px;
+    background-color: #fef3c7;
+    border-left: 4px solid #f59e0b;
+}
+
+.acceptance-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #92400e;
+}
+
+.acceptance-content {
+    color: #92400e;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+/* Enhanced Search Input Styles */
+.search-input {
+    width: 100%;
+    max-width: 300px;
+    padding: 0.75rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.search-input::placeholder {
+    color: #9ca3af;
+}
+
+/* Field Help Tooltip Styles */
+.field-help {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    background-color: #6b7280;
+    color: white;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    text-align: center;
+    cursor: help;
+    margin-left: 0.25rem;
+}
+
+.field-help:hover {
+    background-color: #374151;
+}
+
+/* Form Help Text Enhanced */
+.form-help {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    color: #6b7280;
+    line-height: 1.4;
+}
+
+.form-help strong {
+    color: #374151;
+}
+
+/* Enhanced Filter Group Layout */
+.matrix-filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.filter-group label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+/* Export Modal Styles */
+#exportModal .modal-content {
+    max-width: 500px;
+}
+
+#exportForm .form-group {
+    margin-bottom: 1rem;
+}
+
+#exportForm select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.875rem;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #374151;
+    cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+    margin: 0;
+}
+
+/* Icon Styles for Conditions */
+.icon-arrow-right::before {
+    content: "→";
+    color: #10b981;
+}
+
+.icon-arrow-left::before {
+    content: "←";
+    color: #3b82f6;
+}
+
+.icon-check::before {
+    content: "✓";
+    color: #f59e0b;
+}
+
+.icon-download::before {
+    content: "⬇";
+}
+    
+.form-row {
+    flex-direction: column;
+}
+

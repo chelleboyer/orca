@@ -29,6 +29,10 @@
                 <i class="icon-plus"></i>
                 Bulk Add CTAs
             </button>
+            <button class="btn btn-secondary" onclick="exportMatrix()">
+                <i class="icon-download"></i>
+                Export Matrix
+            </button>
             <button class="btn btn-primary" 
                     hx-get="{% if is_demo %}/api/v1/demo/cta-matrix-grid{% else %}/api/v1/htmx/projects/{{ project.id }}/cta-matrix-grid{% endif %}" 
                     hx-target="#matrix-grid"
@@ -44,6 +48,17 @@
     <!-- Matrix Controls -->
     <div class="matrix-controls">
         <div class="matrix-filters">
+            <div class="filter-group">
+                <label for="searchText">Search CTAs:</label>
+                <input type="text" 
+                       id="searchText" 
+                       placeholder="Search descriptions, conditions, business rules..."
+                       onchange="filterMatrix()" 
+                       onkeyup="debounceSearch()"
+                       class="search-input">
+                <small class="form-help">Search across descriptions, preconditions, postconditions, and business rules</small>
+            </div>
+            
             <div class="filter-group">
                 <label for="filterRole">Filter by Role:</label>
                 <select id="filterRole" onchange="filterMatrix()">
@@ -73,6 +88,17 @@
                     <option value="UPDATE">Update</option>
                     <option value="DELETE">Delete</option>
                     <option value="NONE">Non-CRUD</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="filterConditions">Filter by Conditions:</label>
+                <select id="filterConditions" onchange="filterMatrix()">
+                    <option value="">All CTAs</option>
+                    <option value="with-conditions">With Conditions</option>
+                    <option value="without-conditions">Without Conditions</option>
+                    <option value="with-preconditions">With Preconditions</option>
+                    <option value="with-postconditions">With Postconditions</option>
                 </select>
             </div>
         </div>

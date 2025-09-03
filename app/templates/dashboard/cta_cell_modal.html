@@ -54,15 +54,35 @@
                 {% if cta.preconditions or cta.postconditions %}
                 <div class="cta-conditions">
                     {% if cta.preconditions %}
-                    <div class="condition-item">
-                        <strong>Pre:</strong> {{ cta.preconditions }}
+                    <div class="condition-item condition-pre">
+                        <div class="condition-header">
+                            <i class="icon-arrow-right"></i>
+                            <strong>Preconditions</strong>
+                            <span class="condition-type-badge">BEFORE</span>
+                        </div>
+                        <div class="condition-content">{{ cta.preconditions }}</div>
                     </div>
                     {% endif %}
                     {% if cta.postconditions %}
-                    <div class="condition-item">
-                        <strong>Post:</strong> {{ cta.postconditions }}
+                    <div class="condition-item condition-post">
+                        <div class="condition-header">
+                            <i class="icon-arrow-left"></i>
+                            <strong>Postconditions</strong>
+                            <span class="condition-type-badge">AFTER</span>
+                        </div>
+                        <div class="condition-content">{{ cta.postconditions }}</div>
                     </div>
                     {% endif %}
+                </div>
+                {% endif %}
+                
+                {% if cta.acceptance_criteria %}
+                <div class="cta-acceptance">
+                    <div class="acceptance-header">
+                        <i class="icon-check"></i>
+                        <strong>Acceptance Criteria</strong>
+                    </div>
+                    <div class="acceptance-content">{{ cta.acceptance_criteria }}</div>
                 </div>
                 {% endif %}
             </div>
@@ -134,20 +154,52 @@
             
             <div class="form-row">
                 <div class="form-group">
-                    <label for="preconditions">Preconditions</label>
+                    <label for="preconditions">
+                        Preconditions
+                        <span class="field-help" title="What must be true before this action can be performed">?</span>
+                    </label>
                     <textarea id="preconditions" 
                               name="preconditions" 
-                              placeholder="What must be true before this action?"
-                              rows="2"></textarea>
+                              placeholder="Example: User must be logged in and have admin privileges"
+                              rows="3"></textarea>
+                    <small class="form-help">
+                        <strong>Examples:</strong><br>
+                        • User must be authenticated<br>
+                        • Object must exist and be unlocked<br>
+                        • User must have required permissions
+                    </small>
                 </div>
                 
                 <div class="form-group">
-                    <label for="postconditions">Postconditions</label>
+                    <label for="postconditions">
+                        Postconditions
+                        <span class="field-help" title="What changes after this action is completed">?</span>
+                    </label>
                     <textarea id="postconditions" 
                               name="postconditions" 
-                              placeholder="What changes after this action?"
-                              rows="2"></textarea>
+                              placeholder="Example: User account is created and welcome email is sent"
+                              rows="3"></textarea>
+                    <small class="form-help">
+                        <strong>Examples:</strong><br>
+                        • Object state is updated<br>
+                        • Notifications are sent<br>
+                        • Audit log entries are created
+                    </small>
                 </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="acceptanceCriteria">
+                    Acceptance Criteria
+                    <span class="field-help" title="Specific criteria that must be met for this CTA to be considered complete">?</span>
+                </label>
+                <textarea id="acceptanceCriteria" 
+                          name="acceptance_criteria" 
+                          placeholder="Example: Given user has admin role, when creating user, then user appears in list within 5 seconds"
+                          rows="3"></textarea>
+                <small class="form-help">
+                    Use Given-When-Then format for clear, testable criteria
+                </small>
             </div>
             
             <div class="form-group">

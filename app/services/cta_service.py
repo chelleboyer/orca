@@ -613,3 +613,80 @@ class CTAService:
             CRUDType.UPDATE: "update", 
             CRUDType.DELETE: "delete"
         }.get(crud_type, "interact with")
+
+    async def export_ctas(
+        self, 
+        project_id: uuid.UUID, 
+        export_request: CTAExportRequest, 
+        user_id: uuid.UUID
+    ) -> Dict[str, Any]:
+        """Export CTAs in various formats."""
+        await self._validate_project_access(project_id, user_id)
+        
+        # Build query with filters
+        query = (
+            select(CTA)
+            .options(
+                joinedload(CTA.role),
+                joinedload(CTA.object)
+            )
+            .where(CTA.project_id == project_id)
+        )
+        
+        # Apply filters
+        if export_request.role_ids:
+            query = query.where(CTA.role_id.in_(export_request.role_ids))
+        if export_request.object_ids:
+            query = query.where(CTA.object_id.in_(export_request.object_ids))
+        if export_request.crud_types:
+            query = query.where(CTA.crud_type.in_(export_request.crud_types))
+        
+        result = await self.db.execute(query)
+        ctas = result.scalars().all()
+        
+        # Prepare export data
+        export_data = []
+        for cta in ctas:
+            cta_data = {
+                'id': str(cta.id),
+                'role_name': cta.role.name,
+                'object_name': cta.object.name,
+                'crud_type': cta.crud_type.value,
+                'description': cta.description or '',
+                'is_primary': cta.is_primary,
+                'priority': cta.priority,
+                'status': cta.status.value,
+                'business_value': cta.business_value or '',
+                'story_points': cta.story_points,
+                'created_at': cta.created_at.isoformat(),
+                'updated_at': cta.updated_at.isoformat()
+            }
+            
+            # Include business rules if requested
+            if export_request.include_business_rules:
+                cta_data.update({
+                    'preconditions': cta.preconditions or '',
+                    'postconditions': cta.postconditions or '',
+                    'business_rules': cta.business_rules or '',
+                    'acceptance_criteria': cta.acceptance_criteria or ''
+                })
+            
+            # Include user stories if requested
+            if export_request.include_user_stories:
+                cta_data['user_story'] = cta.user_story or ''
+            
+            export_data.append(cta_data)
+        
+        return {
+            'format': export_request.format,
+            'data': export_data,
+            'total_records': len(export_data),
+            'export_timestamp': datetime.now().isoformat(),
+            'filters_applied': {
+                'role_ids': export_request.role_ids,
+                'object_ids': export_request.object_ids,
+                'crud_types': export_request.crud_types,
+                'include_business_rules': export_request.include_business_rules,
+                'include_user_stories': export_request.include_user_stories
+            }
+        }

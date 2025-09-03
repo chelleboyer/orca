@@ -6,6 +6,7 @@
 // Global state
 let currentMatrix = null;
 let filteredMatrix = null;
+let searchTimeout = null;
 
 // Initialize matrix when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
@@ -520,6 +521,188 @@ function generateUserStories() {
 }
 
 /**
+ * Enhanced search functionality with debouncing
+ */
+function debounceSearch() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        filterMatrix();
+    }, 300); // 300ms delay
+}
+
+/**
+ * Export matrix functionality
+ */
+function exportMatrix() {
+    const projectId = getProjectIdFromUrl();
+    if (!projectId) {
+        alert('Error: Could not determine project ID');
+        return;
+    }
+    
+    // Show export options modal
+    showExportModal(projectId);
+}
+
+/**
+ * Show export modal with options
+ */
+function showExportModal(projectId) {
+    const modal = document.getElementById('exportModal');
+    if (modal) {
+        modal.style.display = 'block';
+        return;
+    }
+    
+    // Create export modal if it doesn't exist
+    const modalHtml = `
+        <div id="exportModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Export CTA Matrix</h3>
+                    <button class="modal-close" onclick="hideExportModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="exportForm">
+                        <div class="form-group">
+                            <label for="exportFormat">Export Format:</label>
+                            <select id="exportFormat" name="format">
+                                <option value="csv">CSV</option>
+                                <option value="json">JSON</option>
+                                <option value="xlsx">Excel (XLSX)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="includeBR" name="include_business_rules" checked>
+                                <span>Include business rules (preconditions, postconditions)</span>
+                            </label>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="includeUS" name="include_user_stories">
+                                <span>Include generated user stories</span>
+                            </label>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="hideExportModal()">Cancel</button>
+                            <button type="button" class="btn btn-primary" onclick="performExport('${projectId}')">Export</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    document.getElementById('exportModal').style.display = 'block';
+}
+
+/**
+ * Hide export modal
+ */
+function hideExportModal() {
+    const modal = document.getElementById('exportModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+/**
+ * Perform the actual export
+ */
+function performExport(projectId) {
+    const form = document.getElementById('exportForm');
+    const formData = new FormData(form);
+    
+    const exportRequest = {
+        format: formData.get('format') || 'csv',
+        include_business_rules: formData.has('include_business_rules'),
+        include_user_stories: formData.has('include_user_stories')
+    };
+    
+    // Show loading state
+    const exportBtn = document.querySelector('#exportForm .btn-primary');
+    const originalText = exportBtn.textContent;
+    exportBtn.textContent = 'Exporting...';
+    exportBtn.disabled = true;
+    
+    fetch(`/api/v1/projects/${projectId}/ctas/export`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(exportRequest)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Export failed: ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.format === 'csv' && data.headers && data.rows) {
+            // Convert to CSV and download
+            downloadCSV(data.headers, data.rows, data.filename || `cta_export_${Date.now()}.csv`);
+        } else {
+            // Download as JSON
+            downloadJSON(data, `cta_export_${Date.now()}.json`);
+        }
+        
+        hideExportModal();
+        alert('Export completed successfully!');
+    })
+    .catch(error => {
+        console.error('Export error:', error);
+        alert(`Export failed: ${error.message}`);
+    })
+    .finally(() => {
+        // Restore button state
+        exportBtn.textContent = originalText;
+        exportBtn.disabled = false;
+    });
+}
+
+/**
+ * Download data as CSV file
+ */
+function downloadCSV(headers, rows, filename) {
+    const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    downloadBlob(blob, filename);
+}
+
+/**
+ * Download data as JSON file
+ */
+function downloadJSON(data, filename) {
+    const jsonString = JSON.stringify(data, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    downloadBlob(blob, filename);
+}
+
+/**
+ * Download blob as file
+ */
+function downloadBlob(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
+
+/**
  * Utility: Debounce function
  */
 function debounce(func, wait) {
@@ -537,6 +720,12 @@ function debounce(func, wait) {
 // Export functions for global access
 window.filterMatrix = filterMatrix;
 window.showCTAModal = showCTAModal;
+window.hideCTAModal = hideCTAModal;
+window.showBulkCreateModal = showBulkCreateModal;
+window.hideBulkCreateModal = hideBulkCreateModal;
+window.exportMatrix = exportMatrix;
+window.hideExportModal = hideExportModal;
+window.debounceSearch = debounceSearch;
 window.hideCTAModal = hideCTAModal;
 window.showBulkCreateModal = showBulkCreateModal;
 window.hideBulkCreateModal = hideBulkCreateModal;
