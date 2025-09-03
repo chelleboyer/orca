@@ -182,9 +182,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const isAuthPage = window.location.pathname.includes('/auth/') || 
                       window.location.pathname === '/login' || 
                       window.location.pathname === '/register';
+    const isDemoPage = window.location.pathname.includes('/demo/');
     
-    if (!token && !isAuthPage) {
-        // Redirect to login if no token and not on auth page
+    if (!token && !isAuthPage && !isDemoPage) {
+        // Redirect to login if no token and not on auth page or demo page
         window.location.href = '/login';
     } else if (token && isAuthPage) {
         // Redirect to dashboard if logged in and on auth page

@@ -330,7 +330,7 @@ async def cta_matrix_demo_page(
         permissions = ["view_content", "edit_ctas", "export_data"]
         
         return templates.TemplateResponse(
-            "dashboard/cta_matrix.html",
+            "dashboard/cta_matrix_demo.html",
             {
                 "request": request,
                 "project": mock_project,

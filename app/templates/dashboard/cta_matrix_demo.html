@@ -1,0 +1,209 @@
+<!-- CTA Matrix Demo Template -->
+{% extends "demo_base.html" %}
+
+{% block title %}OOUX ORCA - CTA Matrix Demo{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', path='/css/dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', path='/css/matrix.css') }}">
+<script src="https://unpkg.com/htmx.org@1.9.6"></script>
+<style>
+.demo-badge {
+    background: #10b981;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="matrix-container">
+    <!-- Header Section -->
+    <header class="matrix-header">
+        <div class="matrix-title-section">
+            <h1 class="matrix-title">Call-to-Action Matrix</h1>
+            <p class="matrix-description">Map roles to objects and define behavioral interactions</p>
+            <nav class="breadcrumb">
+                <span class="breadcrumb-current">{{ project.title }} - CTA Matrix Demo</span>
+            </nav>
+        </div>
+        
+        <div class="matrix-actions">
+            <button class="btn btn-secondary" onclick="showBulkCreateModal()">
+                <i class="icon-plus"></i>
+                Bulk Add CTAs
+            </button>
+            <button class="btn btn-primary" 
+                    hx-get="/api/v1/demo/cta-matrix-grid" 
+                    hx-target="#matrix-grid"
+                    hx-trigger="click"
+                    hx-indicator="#matrix-loading">
+                <i class="icon-refresh"></i>
+                Refresh Matrix
+            </button>
+        </div>
+    </header>
+
+    <!-- Matrix Controls -->
+    <div class="matrix-controls">
+        <div class="matrix-filters">
+            <div class="filter-group">
+                <label for="filterRole">Filter by Role:</label>
+                <select id="filterRole" onchange="filterMatrix()">
+                    <option value="">All Roles</option>
+                    {% for role in matrix_data.roles %}
+                    <option value="{{ role.id }}">{{ role.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="filterObject">Filter by Object:</label>
+                <select id="filterObject" onchange="filterMatrix()">
+                    <option value="">All Objects</option>
+                    {% for object in matrix_data.objects %}
+                    <option value="{{ object.id }}">{{ object.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="filterCrud">Filter by CRUD:</label>
+                <select id="filterCrud" onchange="filterMatrix()">
+                    <option value="">All Operations</option>
+                    <option value="create">Create</option>
+                    <option value="read">Read</option>
+                    <option value="update">Update</option>
+                    <option value="delete">Delete</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="matrix-stats">
+            <div class="stat-item">
+                <span class="stat-label">Roles:</span>
+                <span class="stat-value">{{ matrix_data.roles|length }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Objects:</span>
+                <span class="stat-value">{{ matrix_data.objects|length }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">CTAs:</span>
+                <span class="stat-value" id="cta-count">{{ matrix_data.rows|length * matrix_data.roles|length }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="matrix-loading" class="matrix-loading" style="display: none;">
+        <div class="loading-spinner"></div>
+        <span>Loading matrix...</span>
+    </div>
+
+    <!-- Matrix Grid Container -->
+    <div id="matrix-grid" class="matrix-grid-container">
+        {% include 'dashboard/cta_matrix_grid.html' %}
+    </div>
+
+    <!-- Legend -->
+    <div class="matrix-legend">
+        <h3>CRUD Operations Legend</h3>
+        <div class="legend-items">
+            <div class="legend-item">
+                <div class="legend-icon legend-create"></div>
+                <span>Create - User can create new instances</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-icon legend-read"></div>
+                <span>Read - User can view/access instances</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-icon legend-update"></div>
+                <span>Update - User can modify existing instances</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-icon legend-delete"></div>
+                <span>Delete - User can remove instances</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Create Modal -->
+<div id="bulkCreateModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Bulk Create CTAs</h2>
+            <button onclick="closeBulkCreateModal()" class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Select combinations to create CTAs for:</p>
+            <div class="bulk-create-options">
+                <div class="option-group">
+                    <label>
+                        <input type="checkbox" id="selectAllCombinations">
+                        Select all role-object combinations
+                    </label>
+                </div>
+                <div class="option-group">
+                    <label>CRUD Operations to include:</label>
+                    <div class="crud-checkboxes">
+                        <label><input type="checkbox" value="create" checked> Create</label>
+                        <label><input type="checkbox" value="read" checked> Read</label>
+                        <label><input type="checkbox" value="update"> Update</label>
+                        <label><input type="checkbox" value="delete"> Delete</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button onclick="closeBulkCreateModal()" class="btn btn-secondary">Cancel</button>
+            <button onclick="executeBulkCreate()" class="btn btn-primary">Create CTAs</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', path='/js/cta-matrix.js') }}"></script>
+<script>
+// Demo-specific overrides
+document.addEventListener('DOMContentLoaded', function() {
+    // Override some functions for demo mode
+    window.isDemo = true;
+    
+    // Show demo info
+    setTimeout(() => {
+        App.notifications.info('This is a demo of the CTA Matrix. Click on cells to see CRUD operations!');
+    }, 2000);
+});
+
+function showBulkCreateModal() {
+    App.notifications.info('Bulk creation is available in demo mode - try clicking some cells first!');
+    document.getElementById('bulkCreateModal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeBulkCreateModal() {
+    document.getElementById('bulkCreateModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+function executeBulkCreate() {
+    App.notifications.success('In demo mode - bulk creation would create the selected CTAs!');
+    closeBulkCreateModal();
+}
+
+function filterMatrix() {
+    const roleFilter = document.getElementById('filterRole').value;
+    const objectFilter = document.getElementById('filterObject').value;
+    const crudFilter = document.getElementById('filterCrud').value;
+    
+    App.notifications.info(`Filtering by: ${roleFilter || 'All Roles'}, ${objectFilter || 'All Objects'}, ${crudFilter || 'All CRUD'}`);
+}
+</script>
+{% endblock %}

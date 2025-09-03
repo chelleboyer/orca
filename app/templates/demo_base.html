@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}OOUX ORCA Demo{% endblock %}</title>
+    
+    <!-- Base styles -->
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/components.css') }}">
+    
+    <!-- Icon font -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.css">
+    
+    <!-- Block for additional head content -->
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Demo Navigation Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <a href="#" class="logo">
+                        <span class="logo-text">OOUX ORCA Demo</span>
+                    </a>
+                </div>
+                
+                <nav class="header-nav">
+                    <span class="nav-link">CTA Matrix Demo</span>
+                </nav>
+                
+                <div class="header-right">
+                    <div class="demo-notice">
+                        <span class="demo-badge">DEMO MODE</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="app-main">
+            {% block content %}{% endblock %}
+        </main>
+        
+        <!-- Footer -->
+        <footer class="app-footer">
+            <div class="footer-content">
+                <p>&copy; 2025 OOUX ORCA Demo. Built for Object-Oriented UX methodology.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Notification Container -->
+    <div class="notification-container"></div>
+
+    <!-- Demo-specific JavaScript (no authentication required) -->
+    <script>
+        // Simplified demo app utilities
+        window.App = {
+            config: {
+                apiBaseUrl: '/api/v1',
+                version: '1.0.0',
+                isDemo: true
+            },
+            
+            utils: {
+                escapeHtml: function(text) {
+                    const div = document.createElement('div');
+                    div.textContent = text;
+                    return div.innerHTML;
+                }
+            },
+            
+            notifications: {
+                show: function(message, type = 'info') {
+                    const container = document.querySelector('.notification-container');
+                    if (!container) {
+                        console.warn('Notification container not found');
+                        return;
+                    }
+                    
+                    const notification = document.createElement('div');
+                    notification.className = `notification notification-${type}`;
+                    notification.innerHTML = `
+                        <div class="notification-content">
+                            <span class="notification-message">${App.utils.escapeHtml(message)}</span>
+                            <button class="notification-close" onclick="this.parentElement.parentElement.remove()">&times;</button>
+                        </div>
+                    `;
+                    
+                    container.appendChild(notification);
+                    
+                    // Auto-remove after 5 seconds
+                    setTimeout(() => {
+                        if (notification.parentElement) {
+                            notification.remove();
+                        }
+                    }, 5000);
+                },
+                
+                success: function(message) {
+                    App.notifications.show(message, 'success');
+                },
+                
+                error: function(message) {
+                    App.notifications.show(message, 'error');
+                },
+                
+                info: function(message) {
+                    App.notifications.show(message, 'info');
+                }
+            }
+        };
+
+        // Demo initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('OOUX ORCA Demo initialized');
+            
+            // Show demo mode notice
+            setTimeout(() => {
+                App.notifications.info('You are viewing the CTA Matrix in demo mode. No authentication required!');
+            }, 1000);
+        });
+
+        // Keyboard shortcuts for demo
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                // Close any open modals
+                const modals = document.querySelectorAll('.modal');
+                modals.forEach(modal => {
+                    if (modal.style.display !== 'none') {
+                        modal.style.display = 'none';
+                        document.body.style.overflow = 'auto';
+                    }
+                });
+            }
+        });
+    </script>
+    
+    <!-- Block for additional scripts -->
+    {% block scripts %}{% endblock %}
+</body>
+</html>
