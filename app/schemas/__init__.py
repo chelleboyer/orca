@@ -80,6 +80,20 @@ from .cta import (
     CTAStatsResponse,
 )
 
+from .validation import (
+    ValidationRulesSummary,
+    DimensionScore,
+    ObjectValidation,
+    ObjectValidationDetailed,
+    ExportReadiness,
+    ProjectRecommendation,
+    ValidationSummaryResponse,
+    ValidationGap,
+    ValidationGapsResponse,
+    ValidationStatsResponse,
+    ValidationConfigRequest,
+)
+
 __all__ = [
     # Auth schemas
     "UserBase",
@@ -154,4 +168,17 @@ __all__ = [
     "CTAExportRequest",
     "CTAValidationResult",
     "CTAStatsResponse",
+    
+    # Validation schemas
+    "ValidationRulesSummary",
+    "DimensionScore", 
+    "ObjectValidation",
+    "ObjectValidationDetailed",
+    "ExportReadiness",
+    "ProjectRecommendation",
+    "ValidationSummaryResponse",
+    "ValidationGap",
+    "ValidationGapsResponse",
+    "ValidationStatsResponse",
+    "ValidationConfigRequest",
 ]

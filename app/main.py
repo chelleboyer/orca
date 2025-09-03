@@ -21,6 +21,7 @@ from app.api.v1 import relationships
 from app.api.v1 import roles, ctas
 from app.api.v1 import object_map
 from app.api.v1 import object_cards
+from app.api.v1 import validation
 # from app.api.v1 import attributes, exports
 # from app.api import websocket
 
@@ -71,6 +72,7 @@ app.include_router(roles.router, prefix="/api/v1")
 app.include_router(ctas.router, prefix="/api/v1")
 app.include_router(object_map.router, prefix="/api/v1")
 app.include_router(object_cards.router, prefix="/api/v1")
+app.include_router(validation.router, prefix="/api/v1/projects", tags=["validation"])
 
 # Include HTML dashboard routes (no prefix for frontend pages)
 app.include_router(dashboard.router, prefix="/dashboard", tags=["dashboard-html"])

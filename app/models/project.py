@@ -60,6 +60,8 @@ class Project(BaseModel):
     roles = relationship("Role", back_populates="project", cascade="all, delete-orphan")
     ctas = relationship("CTA", back_populates="project", cascade="all, delete-orphan")
     attributes = relationship("Attribute", back_populates="project", cascade="all, delete-orphan")
+    prioritizations = relationship("Prioritization", back_populates="project", cascade="all, delete-orphan")
+    prioritization_snapshots = relationship("PrioritizationSnapshot", back_populates="project", cascade="all, delete-orphan")
     
     # Table constraints
     __table_args__ = (
